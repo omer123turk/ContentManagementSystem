@@ -12,6 +12,7 @@ import { DtoSeason } from '../../Models/DtoSeason';
 import { DtoEpisode } from '../../Models/DtoEpisode';
 import { MovieCastService } from '../../Services/movie-cast.service';
 import { DtoAllEpisode } from '../../Models/DtoAllEpisode';
+import { DtoContentComplete } from '../../Models/DtoContentComplete';
 
 interface Season {
   id: string;
@@ -30,13 +31,14 @@ export class ShowSeasonsComponent implements OnInit {
 
 
   seasons: Season[] = [];
-  contents: Content[] = [];
   seasonContents: Season[] = [];
 
   seriesId: string = "";
   title: string = "";
   metadata: any = null;
   content: any;
+
+  completeContents: DtoContentComplete[] = [];
 
   constructor(private route: ActivatedRoute,
     private contentService: ContentService,
@@ -49,58 +51,35 @@ export class ShowSeasonsComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.getContents();
+   this.getSeasons();
   }
 
-  getContents() {
-    this.contentService.getAllContents().subscribe({
-      next: (data) => {
-        this.contents = data;
-        this.getSeasons();
-      },
-      error: (err) => {
-        console.error("API Hatası:", err);
-      }
-    });
-  }
-
-  getMetadata(id: number) {
-    this.metadataService.getMetadataById(id).subscribe({
-      next: (data) => {
-        this.metadata = data;
-        this.getSeasons();
-        this.cdr.detectChanges();
-        this.cdr.markForCheck();
-      },
-      error: (err) => {
-        console.error("API Hatası:", err);
-        this.cdr.detectChanges();
-        this.cdr.markForCheck();
-      }
-    })
-  }
+ 
 
   getSeasons() {
     const idFromUrl = this.route.snapshot.paramMap.get('id');
     if (idFromUrl != null)
       this.seriesId = idFromUrl;
 
+    this.seasons = [];
     let i: number = 0;
-    this.contents.forEach(element => {
-      if (element.id == this.seriesId) {
-        this.content = element;
-        this.getMetadata(element.metadataId);
-        element.seasonList.forEach(Seasonelement => {
-          this.seasons.push({ id: Seasonelement, name: `${this.metadata.title}: Season ${i + 1}` });
+
+    this.contentService.getSeasonsBySeriesId(this.seriesId).subscribe({
+      next: (data) => {
+        this.completeContents = data;
+
+        data.forEach(element => {
+          this.seasons.push({ id: element.id, name: `${element.title}` });
           i++;
         });
-
+        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       }
+    })
 
-    });
+    
 
-    this.cdr.detectChanges();
-    this.cdr.markForCheck();
+
 
   }
 
@@ -127,6 +106,6 @@ export class ShowSeasonsComponent implements OnInit {
 
   }
 
-  
+
 
 }

@@ -5,7 +5,6 @@
     <form [formGroup]="editForm" (ngSubmit)="update()">
       <div class="form-grid">
         
-        <!-- Content Type -->
         <div class="form-group">
           <label for="contentTypeSelect">Content Type</label>
           <select id="contentTypeSelect" formControlName="selectedContentType" class="form-control">
@@ -16,54 +15,56 @@
           </select>
         </div>
 
-        <!-- Title -->
         <div class="form-group">
           <label for="title">Title</label>
           <input type="text" id="title" formControlName="title" placeholder="Enter title">
         </div>
 
-        <!-- Year -->
         <div class="form-group">
           <label for="year">Created At (Year)</label>
           <input type="text" id="year" formControlName="year" placeholder="2010">
         </div>
 
-        <!-- Created At Date -->
         <div class="form-group">
           <label for="created_at">Created At (YYYY-MM-DD)</label>
           <input type="date" id="created_at" formControlName="created_at">
         </div>
 
-        <!-- Poster -->
         <div class="form-group full-width">
           <label for="poster">Poster URL</label>
           <input type="text" id="poster" formControlName="poster" placeholder="https://example.com/poster.jpg">
         </div>
 
-        <!-- Language -->
         <div class="form-group">
           <label for="language">Language</label>
           <input type="text" id="language" formControlName="language" placeholder="English">
         </div>
 
-        <!-- Country -->
         <div class="form-group">
           <label for="country">Country</label>
           <input type="text" id="country" formControlName="country" placeholder="USA">
         </div>
 
-        <!-- Director (Backend'den gelen listeye göre Tekli Seçim) -->
-        <div class="form-group full-width">
-          <label for="director">Director</label>
-          <select id="director" formControlName="director" class="form-control">
-            <option value="" disabled selected>Select a Director</option>
-            @for (cast of allCasts; track cast.id) {
-              <option [value]="cast.id">{{ cast.name }}</option>
-            }
-          </select>
+        <div class="form-group full-width autocomplete-wrapper">
+          <label for="directorSearch">Director</label>
+          <input 
+            type="text" 
+            id="directorSearch" 
+            [formControl]="directorSearchCtrl" 
+            placeholder="Type a director name..."
+            class="form-control"
+            (focus)="showDirectorDropdown = true"
+          >
+          
+          @if (showDirectorDropdown && directorSearchCtrl.value) {
+            <ul class="autocomplete-dropdown">
+              @for (director of filteredDirectors; track director.id) {
+                <li (click)="selectDirector(director)">{{ director.name }}</li>
+              }
+            </ul>
+          }
         </div>
 
-        <!-- Plot -->
         <div class="form-group full-width">
           <label for="plot">Plot</label>
           <textarea id="plot" formControlName="plot" rows="3" placeholder="Enter plot summary..."></textarea>
@@ -75,27 +76,33 @@
     </form>
   </div>
 
-  <!-- Casts Yönetim Alanı -->
   @if(!isLoading){
   <div class="casts-card">
     <h3>Content Casts</h3>
     
-    <!-- Backend'den gelen Cast listesinden seçim yapıp ekleme alanı -->
-    <div class="cast-add-pool">
+    <div class="cast-add-pool autocomplete-wrapper">
       <div class="select-wrapper">
-        <select #castSelect class="form-control">
-          <option value="" disabled selected>Choose a cast member to add...</option>
-          @for (cast of allCasts; track cast.id) {
-            <option [value]="cast.id">{{ cast.name }}</option>
-          }
-        </select>
+        <input 
+          type="text" 
+          [formControl]="castSearchCtrl" 
+          placeholder="Type a cast member name..."
+          class="form-control"
+          (focus)="showCastDropdown = true"
+        >
       </div>
-      <button type="button" class="btn-add-cast" (click)="addCastFromPool(castSelect.value); castSelect.value=''">
+      <button type="button" class="btn-add-cast" (click)="addSelectedCast()">
         <span class="icon">+</span> Add to Cast
       </button>
+
+      @if (showCastDropdown && castSearchCtrl.value) {
+        <ul class="autocomplete-dropdown" style="top: 100%;">
+          @for (cast of filteredCasts; track cast.id) {
+            <li (click)="selectCastFromDropdown(cast)">{{ cast.name }}</li>
+          }
+        </ul>
+      }
     </div>
 
-    <!-- Mevcut Ekli Cast Listesi -->
     <form [formGroup]="cardForm">
       <div class="casts-list" formArrayName="cards">
         @if (cardArray.controls.length === 0) {
@@ -105,7 +112,6 @@
         @for (kart of cardArray.controls; track kart; let i = $index) {
           <div class="cast-chip" [formGroupName]="i">
             <input type="hidden" formControlName="id">
-            <!-- Sadece göstermek için text, isterseniz input da kalabilir -->
             <span class="cast-name">{{ kart.get('value')?.value }}</span>
             <button type="button" class="btn-remove-cast" (click)="removeCast(i)" title="Remove">✕</button>
           </div>

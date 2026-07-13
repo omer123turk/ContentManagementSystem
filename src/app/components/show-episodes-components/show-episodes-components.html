@@ -130,36 +130,56 @@
                     <input type="text" formControlName="country" placeholder="USA">
                 </div>
                 
-                <div class="form-group">
+                <div class="form-group autocomplete-wrapper">
                     <label>Director</label>
-                    <select formControlName="director" class="cast-select" style="width: 100%; height: 38px;">
-                        <option value="" disabled selected>Select a director...</option>
-                        @for (cast of availableCasts; track cast.id) {
-                            <option [value]="cast.name">{{ cast.name }}</option>
-                        }
-                    </select>
+                    <input 
+                        type="text" 
+                        [formControl]="directorSearchCtrl" 
+                        placeholder="Type a director name..."
+                        class="cast-select"
+                        style="width: 100%; height: 38px;"
+                        (focus)="showDirectorDropdown = true"
+                    >
+                    @if (showDirectorDropdown && directorSearchCtrl.value) {
+                        <ul class="autocomplete-dropdown">
+                            @for (cast of filteredDirectors; track cast.id) {
+                                <li (click)="selectDirector(cast)">{{ cast.name }}</li>
+                            }
+                            
+                        </ul>
+                    }
                 </div>
             </div>
 
             <div class="form-group cast-management-section">
                 <label>Cast Management</label>
 
-                <div class="cast-input-group">
-                    <select [formControl]="selectedCastControl" class="cast-select">
-                        <option value="" disabled selected>Select a cast member...</option>
-                        @for (cast of availableCasts; track cast.id) {
-                        <option [value]="cast.name">{{ cast.name }}</option>
-                        }
-                    </select>
+                <div class="cast-input-group autocomplete-wrapper">
+                    <input 
+                        type="text" 
+                        [formControl]="castSearchCtrl" 
+                        placeholder="Type a cast member name..."
+                        class="cast-select"
+                        style="flex: 1;"
+                        (focus)="showCastDropdown = true"
+                    >
                     <button type="button" class="btn-add-cast" (click)="addCastToForm()">+ Add Cast</button>
+
+                    @if (showCastDropdown && castSearchCtrl.value) {
+                        <ul class="autocomplete-dropdown" style="top: 100%;">
+                            @for (cast of filteredCasts; track cast.id) {
+                                <li (click)="selectCastFromDropdown(cast)">{{ cast.name }}</li>
+                            }
+                
+                        </ul>
+                    }
                 </div>
 
                 <div class="added-casts-tags">
                     @for (castControl of castsFormArray.controls; track $index) {
                     <div class="cast-tag">
-                        <input type="text" [formControl]="$any(castControl)" class="cast-tag-input">
-                        <button type="button" class="btn-remove-cast"
-                            (click)="removeCastFromForm($index)">&times;</button>
+                        <span class="cast-tag-text">{{ castControl.value }}</span>
+                        <button type="button" class="btn-remove-cast" (click)="removeCastFromForm($index)">&times;</button>
                     </div>
                     } @empty {
                     <p class="no-cast-msg">No casts added yet.</p>

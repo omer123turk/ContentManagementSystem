@@ -1,0 +1,49 @@
+export class DtoAddContent{
+    created_at:Date;
+	directorName:string;
+	movieCastNameList:String[];
+	id:string;
+	contentType:number;
+	seasonList:string[];
+	episodeList:string[];
+	number:number;
+	
+    title:string;
+	plot:string;
+	poster:string;
+	year:string;
+	language:string;
+	country:string;
+
+    constructor(id:string,
+        movieCastNameList:String[],
+        directorName:string,
+        created_at:Date,
+        contentType:number,
+        seasonList:string[],
+        episodeList:string[],
+        number:number,
+        title:string,
+        plot:string,
+	    poster:string,
+	    year:string,
+	    language:string,
+	    country:string,
+                        ){
+        this.id=id;
+        this.movieCastNameList=movieCastNameList;
+        this.directorName=directorName;
+        this.created_at=created_at;
+        this.contentType=contentType;
+        this.seasonList=seasonList;
+        this.episodeList=episodeList;
+        this.number=number;
+        this.title=title;
+        this.plot=plot;
+        this.poster=poster;
+        this.year=year;
+        this.language=language;
+        this.country=country;
+    }    
+
+}

@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormControl } from '@angular/forms';
 import { DtoContentComplete } from '../../Models/DtoContentComplete';
 import { ContentService } from '../../Services/content.service';
 import { MovieCastService } from '../../Services/movie-cast.service';
@@ -8,6 +8,8 @@ import { MovieCast } from '../../Models/MovieCast';
 import { Metadata } from '../../Models/Metadata';
 import { MetadataService } from '../../Services/metadata.service';
 import { DtoMovieCast } from '../../Models/DtoMovieCast';
+import { debounceTime, distinctUntilChanged, switchMap, of } from 'rxjs';
+import { DtoAddContent } from '../../Models/DtoAddContent';
 
 @Component({
   selector: 'app-add-content-component',
@@ -19,7 +21,21 @@ export class AddContentComponent implements OnInit {
 
   mediaForm!: FormGroup;
   castList: MovieCast[] = [];
+  directors: MovieCast[] = [];
+  actors: MovieCast[] = [];
   selectedCastsList: MovieCast[] = [];
+
+  directorSearchCtrl = new FormControl('');
+  castSearchCtrl = new FormControl('');
+
+  filteredDirectors: MovieCast[] = [];
+  filteredCasts: MovieCast[] = [];
+  showDirectorDropdown = false;
+  showCastDropdown = false;
+
+  currentlySelectedCast: any = null;
+
+  selectedDirectorObj: any = null;
 
   constructor(private fb: FormBuilder,
     private contentService: ContentService,
@@ -31,6 +47,8 @@ export class AddContentComponent implements OnInit {
     this.initForm();
     this.watchContentType();
     this.loadCasts();
+    this.setupDirectorSearch();
+    this.setupCastSearch();
   }
 
   initForm(): void {
@@ -50,20 +68,19 @@ export class AddContentComponent implements OnInit {
     });
   }
 
-  // ContentType değişimini izleyen metot
   watchContentType(): void {
     this.mediaForm.get('contentType')?.valueChanges.subscribe((value) => {
       const seasonsControl = this.mediaForm.get('numberOfSeasons');
 
       if (value === 'Series') {
-        // Eğer Series seçilirse, alanı zorunlu yap
+
         seasonsControl?.setValidators([Validators.required, Validators.min(1)]);
       } else {
-        // Movie seçilirse veya temizlenirse, alanı sıfırla ve doğrulamayı kaldır
+
         seasonsControl?.clearValidators();
         seasonsControl?.setValue('');
       }
-      // Değişikliklerin forma yansıması için validasyonu güncelle
+
       seasonsControl?.updateValueAndValidity();
     });
   }
@@ -73,6 +90,7 @@ export class AddContentComponent implements OnInit {
     this.movieCastService.getAllCasts().subscribe({
       next: (data) => {
         this.castList = data;
+        this.getcastByType();
       },
       error: (err) => {
         console.error('Cast listesi yüklenirken hata oluştu:', err);
@@ -113,18 +131,124 @@ export class AddContentComponent implements OnInit {
     this.mediaForm.get('casts')?.setValue(ids);
   }
 
+
+  setupDirectorSearch() {
+    this.directorSearchCtrl.valueChanges.pipe(
+      debounceTime(400), // Kullanıcı yazmayı bitirdikten 400ms sonra tetiklenir
+      distinctUntilChanged(), // Aynı kelime üst üste gelirse tetiklenmez
+      switchMap(value => {
+        if (!value || value.length < 1) {
+          this.filteredDirectors = [];
+          return of([]);
+        }
+        // Backend servis araması (Kendi API'ne göre uyarla)
+        this.filteredDirectors = [];
+        this.directors.forEach(element => {
+          let name: string = String(value);
+          if (element.name.toLowerCase().includes(name.toLowerCase())) {
+            this.filteredDirectors.push(element);
+          }
+        });;
+        return this.filteredCasts;
+
+      })
+    ).subscribe((results: any) => {
+      this.filteredDirectors = results;
+    });
+  }
+
+  selectDirector(director: any) {
+    // Input alanında seçilen kişinin ismini göster
+    this.directorSearchCtrl.setValue(director.name, { emitEvent: false });
+    // Ana formdaki director alanına ID'sini ata
+    this.mediaForm.get('director')?.setValue(director.id);
+    this.showDirectorDropdown = false;
+  }
+
+  // === CAST ARAMA MANTIĞI ===
+  setupCastSearch() {
+    this.castSearchCtrl.valueChanges.pipe(
+      debounceTime(400),
+      distinctUntilChanged(),
+      switchMap(value => {
+        if (!value || value.length < 1) {
+          this.filteredCasts = [];
+          return of([]);
+        }
+
+        this.filteredCasts = [];
+        // Backend servis araması (Kendi API'ne göre uyarla)
+        this.actors.forEach(element => {
+          let name: string = String(value);
+          if (element.name.includes(name)) {
+            this.filteredCasts.push(element);
+          }
+        });;
+        return this.filteredCasts;
+      })
+    ).subscribe((results: any) => {
+      // Hali hazırda eklenmiş olanları listede tekrar göstermemek için filtreleyebilirsin
+      if (this.filteredCasts.length > 1)
+        this.filteredCasts = results.filter((c: any) => !this.selectedCastsList.some(sc => sc.id === c.id));
+    });
+  }
+
+  selectCastFromDropdown(cast: any) {
+    this.castSearchCtrl.setValue(cast.name, { emitEvent: false });
+    this.currentlySelectedCast = cast; // Ekleme butonuna basılmak üzere hafızaya al
+    this.showCastDropdown = false;
+  }
+
+  addSelectedCast() {
+
+    const writtenName = this.castSearchCtrl.value?.trim();
+    if (!writtenName) return;
+
+    if (this.currentlySelectedCast) {
+      // Listede yoksa ekle
+      if (!this.selectedCastsList.some(c => c.id === this.currentlySelectedCast.id)) {
+        this.selectedCastsList.push(this.currentlySelectedCast);
+      }
+      // Inputu ve geçici seçimi temizle
+      this.castSearchCtrl.setValue('');
+      this.currentlySelectedCast = null;
+    }
+    else {
+      let movieCast: MovieCast = { id: 0, name: writtenName, poster: "", contentIdList: [], castType: 0 };
+      this.selectedCastsList.push(movieCast);
+      this.castSearchCtrl.setValue('');
+      this.currentlySelectedCast = null;
+      this.filteredCasts = [];
+    }
+  }
+
+
+
   onSubmit(): void {
     if (this.mediaForm.valid) {
       console.log('Form Verisi:', this.mediaForm.value);
 
+      //Content Type
       let contentType: number = 0;
       let number: number = 0;
       if (this.mediaForm.value.contentType != "Movie") {
         contentType = 1; number = this.mediaForm.value.numberOfSeasons;
       }
 
-      let Content: DtoContentComplete = new DtoContentComplete(this.mediaForm.value.id, this.mediaForm.value.casts, Number(this.mediaForm.value.director), new Date, contentType, [], [], number, this.mediaForm.value.title, this.mediaForm.value.plot, this.mediaForm.value.poster, this.mediaForm.value.year, this.mediaForm.value.language, this.mediaForm.value.country);
-      this.contentService.addContentComplete(Content).subscribe({
+      //Director
+      const writtenName = this.directorSearchCtrl.value?.trim();
+      let directorName: string = "";
+      if (writtenName != null)
+        directorName = writtenName;
+
+      //Casts
+      let movieCastNameList: String[] = [];
+      this.selectedCastsList.forEach(element => {
+        movieCastNameList.push(element.name);
+      });
+
+      let Content: DtoAddContent = new DtoAddContent(this.mediaForm.value.id, movieCastNameList, directorName, new Date, contentType, [], [], number, this.mediaForm.value.title, this.mediaForm.value.plot, this.mediaForm.value.poster, this.mediaForm.value.year, this.mediaForm.value.language, this.mediaForm.value.country);
+      this.contentService.addContentWithActors(Content).subscribe({
         next: (response) => {
           console.log(response);
           this.mediaForm.reset();
@@ -183,8 +307,8 @@ export class AddContentComponent implements OnInit {
             poster: data.Poster || '',
             language: data.Language || '',
             country: data.Country || '',
-            director: directorId || '' ,
-            numberOfSeasons:data.totalSeasons
+            director: directorId || '',
+            numberOfSeasons: data.totalSeasons
           });
 
           // Eğer backend'den oyuncu listesi (casts) nesnesi de geliyorsa onları chip listesine ekleyebilirsiniz
@@ -224,5 +348,10 @@ export class AddContentComponent implements OnInit {
         alert('Backend sorgusu sırasında bir hata meydana geldi.');
       }
     });
+  }
+
+  getcastByType() {
+    this.actors = this.castList.filter(cast => cast.castType === 0);
+    this.directors = this.castList.filter(cast => cast.castType === 1);
   }
 }

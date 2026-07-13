@@ -1,10 +1,12 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, FormArray, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, FormArray, Validators, ReactiveFormsModule, FormControl } from '@angular/forms';
 import { MovieCast } from '../../Models/MovieCast';
 import { MovieCastService } from '../../Services/movie-cast.service';
 import { ActivatedRoute } from '@angular/router';
 import { ContentService } from '../../Services/content.service';
 import { DtoContentComplete } from '../../Models/DtoContentComplete';
+import { debounceTime, distinctUntilChanged, switchMap, of } from 'rxjs';
+import { DtoAddContent } from '../../Models/DtoAddContent';
 
 
 @Component({
@@ -23,6 +25,19 @@ export class EditComponent implements OnInit {
   // Backend'den çekilecek tüm oyuncu havuzu (Hem Director hem Cast seçimi için ortak)
   allCasts: MovieCast[] = [];
 
+  // Arama kontrolleri ve dropdown durumları
+  directorSearchCtrl = new FormControl('');
+  castSearchCtrl = new FormControl('');
+  
+  filteredDirectors: any[] = [];
+  filteredCasts: any[] = [];
+  showDirectorDropdown = false;
+  showCastDropdown = false;
+
+  // Seçili nesne referansları
+  selectedDirectorObj: any = null;
+  currentlySelectedCast: any = null;
+
   constructor(private fb: FormBuilder,
     private movieCastService: MovieCastService,
     private route: ActivatedRoute,
@@ -38,6 +53,9 @@ export class EditComponent implements OnInit {
     if (idFromUrln != null) {
       this.idFromUrl = idFromUrln;
     }
+
+    this.setupDirectorSearch();
+    this.setupCastSearch();
 
   }
 
@@ -107,8 +125,9 @@ export class EditComponent implements OnInit {
                 poster: data.poster,
                 language: data.language,
                 country: data.country,
-                director: director
               });
+
+              this.directorSearchCtrl.setValue(director.name);
 
               // Mevcut cast'leri FormArray'e dolduruyoruz
 
@@ -169,32 +188,7 @@ export class EditComponent implements OnInit {
 
   }
 
-  /**
-   * Seçim havuzundan (Select box) seçilen oyuncuyu listeye (FormArray) ekler
-   */
-  addCastFromPool(castId: string): void {
-    if (!castId) return;
 
-    // Select elementinden gelen string ID'yi number'a çeviriyoruz
-    const numericId = parseInt(castId, 10);
-    const selectedCast = this.allCasts.find(c => c.id === numericId);
-
-    if (selectedCast) {
-      // Aynı oyuncunun listede zaten olup olmadığını kontrol ediyoruz (Mükerrer kaydı önler)
-      const isAlreadyAdded = this.cardArray.controls.some(
-        control => control.get('id')?.value === selectedCast.id
-      );
-
-      if (!isAlreadyAdded) {
-        this.cardArray.push(this.fb.group({
-          id: [selectedCast.id],
-          value: [selectedCast.name]
-        }));
-      } else {
-        alert('This cast member is already added!');
-      }
-    }
-  }
 
   /**
    * Seçilen oyuncuyu FormArray listesinden indeksine göre siler
@@ -225,23 +219,131 @@ export class EditComponent implements OnInit {
     if (idFromUrln != null)
       this.idFromUrl = idFromUrln;
 
-    let movieCastIdList: number[] = [];
+    let movieCastNameList: string[] = [];
     let casts: any[] = this.cardArray.value;
     casts.forEach(element => {
-      movieCastIdList.push(element.id);
+      movieCastNameList.push(element.value);
     });
+
+   const writtenName = this.directorSearchCtrl.value?.trim();
+      let directorName:string="";
+      if(writtenName!=null)
+        directorName=writtenName;
 
     this.contentService.getContentById(this.idFromUrl).subscribe({
       next: (data) => {
-        let CompleteContent: DtoContentComplete = new DtoContentComplete(this.idFromUrl, movieCastIdList, Number(this.editForm.value.director), this.editForm.value.created_at, this.editForm.value.selectedContentType, data.seasonList, data.episodeList, data.number, this.editForm.value.title, this.editForm.value.plot, this.editForm.value.poster, this.editForm.value.year, this.editForm.value.language, this.editForm.value.country);
-        this.contentService.updateCompleteContent(CompleteContent).subscribe({
+        let CompleteContent: DtoAddContent = new DtoAddContent(this.idFromUrl, movieCastNameList, directorName, this.editForm.value.created_at, this.editForm.value.selectedContentType, data.seasonList, data.episodeList, data.number, this.editForm.value.title, this.editForm.value.plot, this.editForm.value.poster, this.editForm.value.year, this.editForm.value.language, this.editForm.value.country);
+        this.contentService.updateContentWithActors(CompleteContent).subscribe({
           next:(data)=>{
-
+            alert('Update successfully completed.');
           }
         });
       }
     })
 
 
+  }
+
+
+  // === DIRECTOR ARAMA MANTIĞI ===
+  setupDirectorSearch() {
+    this.directorSearchCtrl.valueChanges.pipe(
+      debounceTime(400),
+      distinctUntilChanged(),
+      switchMap(value => {
+        if (this.selectedDirectorObj && this.selectedDirectorObj.name !== value) {
+          this.selectedDirectorObj = null;
+          this.editForm.get('director')?.setValue('');
+        }
+        if (!value || value.length < 0) {
+          this.filteredDirectors = this.allCasts;
+          return of([]);
+        }
+        this.filteredDirectors = [];
+        this.allCasts.forEach(element => {
+          let name: string = String(value);
+          if (element.name.toLowerCase().includes(name.toLowerCase().trim())) {
+            this.filteredDirectors.push(element);
+          }
+        });;
+        return this.filteredCasts;
+      })
+    ).subscribe((results: any) => {
+      this.filteredDirectors = results;
+    });
+  }
+
+  selectDirector(director: any) {
+    this.selectedDirectorObj = director;
+    this.directorSearchCtrl.setValue(director.name, { emitEvent: false });
+    this.editForm.get('director')?.setValue(director.id);
+    this.showDirectorDropdown = false;
+  }
+
+  setupCastSearch() {
+    this.castSearchCtrl.valueChanges.pipe(
+      debounceTime(400),
+      distinctUntilChanged(),
+      switchMap(value => {
+        if (this.currentlySelectedCast && this.currentlySelectedCast.name !== value) {
+          this.currentlySelectedCast = null;
+        }
+        if (!value || value.length < 1) {
+          this.filteredCasts = [];
+          return of([]);
+        }
+       this.filteredCasts = [];
+        // Backend servis araması (Kendi API'ne göre uyarla)
+        this.allCasts.forEach(element => {
+          let name: string = String(value);
+          if (element.name.includes(name)) {
+            this.filteredCasts.push(element);
+          }
+        });;
+        return this.filteredCasts;
+      })
+    ).subscribe((results: any) => {
+      // Listede halihazırda ekli olanları dropdown'da gizle
+      const existingIds = this.cardArray.value.map((c: any) => c.id);
+      this.filteredCasts = results.filter((c: any) => !existingIds.includes(c.id));
+    });
+  }
+
+  selectCastFromDropdown(cast: any) {
+    this.castSearchCtrl.setValue(cast.name, { emitEvent: false });
+    this.currentlySelectedCast = cast;
+    this.showCastDropdown = false;
+  }
+
+  addSelectedCast() {
+    const writtenName = this.castSearchCtrl.value?.trim();
+    if (!writtenName) return;
+
+    if (this.currentlySelectedCast) {
+      this.pushCastToFormArray(this.currentlySelectedCast);
+      this.resetCastInput();
+    } else {
+       this.cardArray.push(new FormGroup({
+        id: new FormControl(0),
+        value: new FormControl(writtenName)
+      }));
+    }
+  }
+
+  pushCastToFormArray(cast: any) {
+    const existingIds = this.cardArray.value.map((c: any) => c.id);
+    if (!existingIds.includes(cast.id)) {
+      this.cardArray.push(new FormGroup({
+        id: new FormControl(cast.id),
+        value: new FormControl(cast.name)
+      }));
+    }
+  }
+
+  resetCastInput() {
+    this.castSearchCtrl.setValue('');
+    this.currentlySelectedCast = null;
+    this.filteredCasts = [];
+    this.showCastDropdown = false;
   }
 }

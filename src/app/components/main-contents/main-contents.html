@@ -39,16 +39,16 @@
                         @for (content of movieContents; track content.id) {
                         <tr>
                             <td class="td-poster">
-                                @if (getDirectorById(content.directorId) && getCastsById(content.id)) {}
+    
                                 <img [src]="content.poster || 'https://via.placeholder.com/40x60'" alt="Poster">
                             </td>
                             <td class="td-title"><strong>{{ content.title }}</strong></td>
                             <td>{{ content.year }}</td>
-                            <td>{{ findDirector?.name || '-' }}</td>
+                            <td>{{ content.directorName }}</td>
                             <td class="td-casts">
                                 <div class="cast-badges">
-                                    @for (moviecast of findMovieCastList; track moviecast.id) {
-                                    <span class="cast-badge">{{ moviecast.name }}</span>
+                                    @for (moviecast of content.movieCastNameList; track moviecast) {
+                                    <span class="cast-badge">{{ moviecast }}</span>
                                     } @empty { - }
                                 </div>
                             </td>
@@ -131,16 +131,15 @@
 
                         <tr>
                             <td class="td-poster">
-                                @if (getDirectorById(content.directorId) && getCastsById(content.id)) {}
                                 <img [src]="content.poster || 'https://via.placeholder.com/40x60'" alt="Poster">
                             </td>
                             <td class="td-title"><strong>{{ content.title }}</strong></td>
                             <td>{{ content.year }}</td>
-                            <td>{{ findDirector?.name || '-' }}</td>
+                            <td>{{ content.directorName }}</td>
                             <td class="td-casts">
                                 <div class="cast-badges">
-                                    @for (moviecast of findMovieCastList; track moviecast.id) {
-                                    <span class="cast-badge">{{ moviecast.name }}</span>
+                                    @for (moviecast of content.movieCastNameList; track moviecast) {
+                                    <span class="cast-badge">{{ moviecast }}</span>
                                     } @empty { - }
                                 </div>
                             </td>

@@ -454,3 +454,50 @@
     cursor: not-allowed;
     background-color: #f8f9fa;
 }
+
+.autocomplete-wrapper {
+  position: relative;
+}
+
+.autocomplete-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  border: 1px solid #ced4da;
+  border-top: none;
+  max-height: 150px;
+  overflow-y: auto;
+  z-index: 2000; /* Modalın üstünde durması için yüksek z-index */
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 0 0 4px 4px;
+}
+
+.autocomplete-dropdown li {
+  padding: 8px 12px;
+  cursor: pointer;
+  color: #495057;
+  text-align: left;
+}
+
+.autocomplete-dropdown li:hover {
+  background-color: #f8f9fa;
+  color: #000000;
+}
+
+.no-result-info {
+  color: #6c757d !important;
+  font-style: italic;
+  font-size: 0.85rem;
+  background-color: #fdfefe;
+  cursor: default !important;
+}
+
+.cast-tag-text {
+  margin-right: 6px;
+  font-weight: 500;
+}

@@ -198,3 +198,48 @@ textarea {
   margin: 2rem 0;
   font-style: italic;
 }
+
+.autocomplete-wrapper {
+  position: relative;
+}
+
+.autocomplete-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  border: 1px solid #ced4da;
+  border-top: none;
+  max-height: 180px;
+  overflow-y: auto;
+  z-index: 1050;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+  border-radius: 0 0 4px 4px;
+}
+
+.autocomplete-dropdown li {
+  padding: 8px 12px;
+  cursor: pointer;
+  color: #495057;
+}
+
+.autocomplete-dropdown li:hover {
+  background-color: #f8f9fa;
+  color: #000000;
+}
+
+.no-result-info {
+  color: #6c757d !important;
+  font-style: italic;
+  font-size: 0.88rem;
+  background-color: #fdfefe;
+  cursor: default !important;
+}
+
+.no-result-info:hover {
+  background-color: #fdfefe !important;
+}

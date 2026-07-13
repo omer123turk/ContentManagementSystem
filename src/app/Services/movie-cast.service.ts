@@ -42,6 +42,8 @@ export class MovieCastService {
         return this.http.get<DtoMovieCast>(`${this.apiUrl}/get-cast-page?page=${page}&size=${size}`);
     }
 
-   
+    public updateCastByContentId(id: string): Observable<boolean> {
+        return this.http.get<boolean>(`${this.apiUrl}/update-cast-by-deleted-content/${id}`);
+    }
 
 }

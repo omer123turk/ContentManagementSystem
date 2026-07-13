@@ -7,6 +7,8 @@ import { DtoContentComplete } from '../Models/DtoContentComplete';
 import { DtoSeason } from '../Models/DtoSeason';
 import { DtoEpisode } from '../Models/DtoEpisode';
 import { DtoAllEpisode } from '../Models/DtoAllEpisode';
+import { DtoAddContent } from '../Models/DtoAddContent';
+import { DtoEpisodeWithActors } from '../Models/DtoEpisodeWithActors';
 
 @Injectable({
     providedIn: 'root'
@@ -68,8 +70,8 @@ export class ContentService {
         return this.http.put<boolean>(`${this.apiUrl}/update-complete-content`, content);
     }
 
-     public getPageContentByType(contentType: number,page:number,size:number): Observable<DtoContentComplete> {
-        return this.http.get<DtoContentComplete>(`${this.apiUrl}/get-page-content?type=${contentType}&page=${page}&size=${size}`);
+     public getPageContentByType(contentType: number,page:number,size:number): Observable<any> {
+        return this.http.get<any>(`${this.apiUrl}/get-page-content?type=${contentType}&page=${page}&size=${size}`);
     }
 
      public getPageEpisodeContentBySeason(seasonId: string,page:number,size:number): Observable<DtoContentComplete> {
@@ -80,4 +82,23 @@ export class ContentService {
         return this.http.post<boolean>(`${this.apiUrl}/add-all-episode`, episodeList);
     }
 
+    public addContentWithActors(content: DtoAddContent): Observable<Content> {
+        return this.http.post<Content>(`${this.apiUrl}/add-content-with-actors`, content);
+    }
+
+    public updateContentWithActors(content: DtoAddContent): Observable<boolean> {
+        return this.http.put<boolean>(`${this.apiUrl}/update-content-with-actors`, content);
+    }
+
+     public deleteCompleteContent(id: string): Observable<boolean> {
+        return this.http.delete<boolean>(`${this.apiUrl}/delete-complete-content/${id}`);
+    }
+
+    public addEpisodeWithActorsToSeason(episode: DtoEpisodeWithActors): Observable<Content> {
+        return this.http.post<Content>(`${this.apiUrl}/add-episode-with-actors-to-season`, episode);
+    }
+
+     public getSeasonsBySeriesId(id: String): Observable<DtoContentComplete[]> {
+        return this.http.get<DtoContentComplete[]>(`${this.apiUrl}/get-seasons-by-series-id/${id}`);
+    }
 }

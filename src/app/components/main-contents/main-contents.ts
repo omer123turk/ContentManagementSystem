@@ -16,6 +16,7 @@ import { RouterLink } from '@angular/router';
 import { switchMap } from 'rxjs/operators';
 import { forkJoin } from 'rxjs';
 import { DtoContentComplete } from '../../Models/DtoContentComplete';
+import { DtoAddContent } from '../../Models/DtoAddContent';
 
 type ContentType = 'movies' | 'series';
 
@@ -32,19 +33,21 @@ export class MainContents implements OnInit {
   public moviecasts: MovieCast[] = [];
   public findMetadata: any = null;
   public isLoading: boolean = true;
-  public findMovieCastList: Array<MovieCast> = new Array();
+  public findMovieCastList: MovieCast[][] = [];
   public findDirector: any = null;
   public findContent: any;
   activeContentType: ContentType = 'movies';
-  public movieContents:DtoContentComplete[]=[];
-  public seriesContents:DtoContentComplete[]=[];
+  public movieContents: DtoAddContent[] = [];
+  public seriesContents: DtoAddContent[] = [];
 
   currentPage: number = 1;     // Aktif sayfa (1'den başlar)
   pageSize: number = 10;       // Sayfa başına gösterilecek kayıt sayısı
   totalElements: number = 0;   // Backend'den gelen toplam kayıt sayısı
   totalPages: number = 0;      // Toplam sayfa sayısı
   pageNumbers: number[] = [];  // Sayfa buton numaraları dizisi [1, 2, 3...]
-  
+
+
+  contentNumber: number = 0;
   // HTML şablonunda Math fonksiyonunu kullanabilmek için
   protected Math = Math;
 
@@ -70,7 +73,7 @@ export class MainContents implements OnInit {
 
 
 
- 
+
 
   public getAllCasts(): void {
     this.moviecastService.getAllCasts().subscribe(
@@ -104,10 +107,13 @@ export class MainContents implements OnInit {
 
   public getCastsById(id: string): boolean {
 
+    let i: number = this.contentNumber;
     this.moviecastService.getCastsByContentId(id).subscribe(
       (response: MovieCast[]) => {
+
         this.findMovieCastList = new Array();
-        this.findMovieCastList = response;
+        this.findMovieCastList[i] = response;
+        this.contentNumber++;
         //this.cdr.markForCheck();
         //this.cdr.detectChanges();
 
@@ -144,93 +150,11 @@ export class MainContents implements OnInit {
 
   onDelete(id: string) {
 
-    //update Casts
-    this.getCastsById(id);
-    this.findMovieCastList.forEach(element => {
-      this.getDirectorById(element.id);
-      let contentIdList: string[] = this.findDirector.contentIdList;
-      let index: number = 0;
-      contentIdList.forEach(contentId => {
-        if (contentId == id) {
-          index = contentIdList.indexOf(contentId);
-        }
-      });
-      contentIdList.splice(index, 1);
-      this.findDirector.contentIdList = contentIdList;
+    this.contentService.deleteCompleteContent(id).subscribe({
+      next: (data) => {
 
-      this.moviecastService.updateCast(this.findDirector).subscribe({
-        next: (response) => {
-        },
-        error: (err) => {
-          console.error('Kayıt esnasında hata oluştu:', err);
-
-        }
-      });
-    });
-
-    //Update Director
-
-
-    this.getContentById(id);
-    setTimeout(() => {
-      this.getDirectorById(this.findContent.directorId);
-      setTimeout(() => {
-        let contentIdList: string[] = this.findDirector.contentIdList;
-        let index: number = 0;
-        contentIdList.forEach(contentId => {
-          if (contentId == id) {
-            index = contentIdList.indexOf(contentId);
-          }
-        });
-        contentIdList.splice(index, 1);
-        this.findDirector.contentIdList = contentIdList;
-
-        this.moviecastService.updateCast(this.findDirector).subscribe({
-          next: (response) => {
-          },
-          error: (err) => {
-            console.error('Kayıt esnasında hata oluştu:', err);
-
-          }
-        });
-      }, 300)
-    }, 300)
-
-
-    //Delete Metadata
-
-    setTimeout(() => {
-      this.getMetadataById(this.findContent.metadataId);
-      setTimeout(() => {
-        this.metadataService.deleteMetadata(this.findMetadata.id).subscribe({
-          next: (response) => {
-          },
-          error: (err) => {
-            console.error('Kayıt esnasında hata oluştu:', err);
-
-          }
-        });
-      }, 300)
-    }, 300)
-
-
-
-
-
-
-    //Delete Content
-
-    setTimeout(() => {
-      this.contentService.deleteContent(this.findContent.id).subscribe({
-        next: (response) => {
-        },
-        error: (err) => {
-          console.error('Kayıt esnasında hata oluştu:', err);
-
-        }
-      });
-    }, 300)
-
+      }
+    })
 
   }
 
@@ -243,13 +167,13 @@ export class MainContents implements OnInit {
 
   loadData(): void {
     this.isLoading = true;
-    
+
     // Backend API'nizin beklentisine göre sayfa indeksini ayarlayın (0 tabanlı veya 1 tabanlı)
     // Çoğu backend (Spring Boot, .NET vb.) sayfaları 0'dan başlatır: (this.currentPage - 1)
-    const pageParam = this.currentPage-1; 
-    let contentType:number=0;
-    if(this.activeContentType=='series')
-      contentType=1;
+    const pageParam = this.currentPage - 1;
+    let contentType: number = 0;
+    if (this.activeContentType == 'series')
+      contentType = 1;
 
     this.contentService.getPageContentByType(contentType, pageParam, this.pageSize)
       .subscribe({
@@ -265,7 +189,7 @@ export class MainContents implements OnInit {
           this.totalElements = response.totalElements;
           this.totalPages = response.totalPages;
           this.generatePageNumbers();
-          
+
           this.isLoading = false;
           this.cdr.detectChanges();
           this.cdr.markForCheck();
@@ -278,6 +202,8 @@ export class MainContents implements OnInit {
         }
       });
   }
+
+
 
   /**
    * Sayfa butonlarının [1, 2, 3...] dinamik dizisini oluşturur
@@ -301,6 +227,6 @@ export class MainContents implements OnInit {
 
 
 
-  
+
 
 }

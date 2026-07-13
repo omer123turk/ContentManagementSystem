@@ -42,28 +42,41 @@
       <input id="year" type="number" formControlName="year" placeholder="Year">
     </div>
 
-    <div class="form-group">
-      <label for="director">Director</label>
-      <select id="director" formControlName="director">
-        <option value="">Select a Director</option>
-        <option *ngFor="let cast of castList" [value]="cast.id">
-          {{ cast.name }}
-        </option>
-      </select>
+    <div class="form-group autocomplete-wrapper">
+      <label for="directorSearch">Director</label>
+      <input 
+        id="directorSearch" 
+        type="text" 
+        [formControl]="directorSearchCtrl" 
+        placeholder="Type a director name..."
+        (focus)="showDirectorDropdown = true"
+      >
+      <ul class="autocomplete-dropdown" *ngIf="showDirectorDropdown && filteredDirectors.length > 0">
+        <li *ngFor="let director of filteredDirectors" (click)="selectDirector(director)">
+          {{ director.name }}
+        </li>
+      </ul>
     </div>
 
-    <div class="form-group">
+    <div class="form-group autocomplete-wrapper">
       <label>Casts</label>
       <div class="cast-selector-wrapper">
-        <select #selectedCast class="cast-select-input">
-          <option value="">Choose a cast member to add...</option>
-          <option *ngFor="let cast of getAvailableCasts()" [value]="cast.id">
-            {{ cast.name }}
-          </option>
-        </select>
-        <button type="button" class="btn-add-cast" (click)="addCastMember(selectedCast.value); selectedCast.value = ''">
+        <input 
+          type="text" 
+          [formControl]="castSearchCtrl" 
+          placeholder="Type a cast member name..."
+          (focus)="showCastDropdown = true"
+          class="cast-select-input"
+        >
+        <button type="button" class="btn-add-cast" (click)="addSelectedCast()">
           Add Cast
         </button>
+        
+        <ul class="autocomplete-dropdown" *ngIf="showCastDropdown && filteredCasts.length > 0">
+          <li *ngFor="let cast of filteredCasts" (click)="selectCastFromDropdown(cast)">
+            {{ cast.name }}
+          </li>
+        </ul>
       </div>
 
       <div class="chips-container" *ngIf="selectedCastsList.length > 0">

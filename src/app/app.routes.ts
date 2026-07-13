@@ -1,6 +1,5 @@
 import { Routes } from '@angular/router';
 import { MainContents } from './components/main-contents/main-contents';
-import { AddComponent } from './components/add-component/add-component';
 import { EditComponent } from './components/edit-component/edit-component';
 import { AllCasts } from './components/all-casts/all-casts';
 import { ShowSeasonsComponent } from './components/show-seasons-component/show-seasons-component';

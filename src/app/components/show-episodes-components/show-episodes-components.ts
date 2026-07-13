@@ -15,6 +15,9 @@ import { DtoMetadataUpdate } from '../../Models/DtoMetadataUpdate';
 import { DtoEpisode } from '../../Models/DtoEpisode';
 import { DtoContentComplete } from '../../Models/DtoContentComplete';
 import { DtoAllEpisode } from '../../Models/DtoAllEpisode';
+import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs';
+import { DtoAddContent } from '../../Models/DtoAddContent';
+import { DtoEpisodeWithActors } from '../../Models/DtoEpisodeWithActors';
 
 interface Episode {
   id: string;
@@ -47,10 +50,23 @@ export class ShowEpisodesComponents implements OnInit {
   season: any;
   episodes: Episode[] = [];
 
+  // Elinizdeki mevcut havuz (Mevcut kodunuzdaki isimle eşleşmeli)
+  availableCasts: any[] = [];
 
-  // Backend'den gelen tüm oyuncular ve seçilen oyuncunun geçici state'i
-  availableCasts: MovieCast[] = [];
-  selectedCastControl = new FormControl(''); // Select kutusunun değerini tutar
+  // Yeni Arama Kontrolleri ve Dropdown Görünürlükleri
+  directorSearchCtrl = new FormControl('');
+  castSearchCtrl = new FormControl('');
+
+  filteredDirectors: any[] = [];
+  filteredCasts: any[] = [];
+  showDirectorDropdown = false;
+  showCastDropdown = false;
+
+  // Seçilen geçici nesneler
+  selectedDirectorObj: any = null;
+  currentlySelectedCast: any = null;
+
+
 
   // Pop-up kontrolcüleri
   isModalOpen = false;
@@ -126,6 +142,8 @@ export class ShowEpisodesComponents implements OnInit {
     }
 
     this.getAllContents();
+    this.setupDirectorSearch();
+    this.setupCastSearch();
 
   }
 
@@ -153,7 +171,7 @@ export class ShowEpisodesComponents implements OnInit {
       .subscribe({
         next: (response: any) => {
           // Backend'den Page formatında dönen veri ({ content: [], totalElements: X, totalPages: Y })
-          this.episodeContents=[];
+          this.episodeContents = [];
           this.episodeContents = response.content;
           console.log(response);
           this.totalElements = response.totalElements;
@@ -185,7 +203,7 @@ export class ShowEpisodesComponents implements OnInit {
 
 
   loadEpisodesInformations() {
-    this.episodes=[];
+    this.episodes = [];
     this.episodeContents.forEach(contentElement => {
       this.metadatas.forEach(metadataElement => {
         if (metadataElement.id == contentElement.metadataId) {
@@ -224,15 +242,7 @@ export class ShowEpisodesComponents implements OnInit {
     return casts;
   }
 
-  getEpisodeCasts(id: string) {
-    this.contents.forEach(element => {
-      if (element.id == id) {
-        element.movieCastIdList.forEach(castElement => {
-
-        });
-      }
-    });
-  }
+ 
 
   loadDirector(directorId: number): String {
     let director: String = "";
@@ -249,14 +259,12 @@ export class ShowEpisodesComponents implements OnInit {
     this.currentEpisodeId = undefined;
     this.episodeForm.reset({ year: new Date().getFullYear() });
     this.castsFormArray.clear(); // Listeyi temizle
-    this.selectedCastControl.setValue('');
     this.isModalOpen = true;
   }
 
   openEditModal(episode: Episode) {
     this.isEditMode = true;
     this.currentEpisodeId = episode.id;
-    this.selectedCastControl.setValue('');
 
     // Formun diğer alanlarını doldur
     this.episodeForm.patchValue({
@@ -304,26 +312,20 @@ export class ShowEpisodesComponents implements OnInit {
       console.log(episodeData);
 
       //Director
-      let directorId: number = 0;
-      if (episodeData.director != null) {
-        directorId = Number(episodeData.director);
-      }
+      let directorName: string = "";
+      const writtenName = this.directorSearchCtrl.value?.trim();
+      if(writtenName!=null)
+        directorName=writtenName;
       //Casts
       let movieCastIdList: number[] = [];
       let casts: string[] = [];
       casts = episodeData.casts;
-      casts.forEach(element => {
-        this.movieCasts.forEach(movieCast => {
-          if (movieCast.name == element) {
-            movieCastIdList.push(movieCast.id);
-          }
-        });
-      });
+      
 
-      let completeContent: DtoContentComplete = new DtoContentComplete(this.currentEpisodeId, movieCastIdList, directorId, new Date, 3, [], [], episode.number, episodeData.title, episodeData.plot, episodeData.poster, episodeData.year, episodeData.language, episodeData.country);
-      this.contentService.updateCompleteContent(completeContent).subscribe({
+      let completeContent: DtoAddContent = new DtoAddContent(this.currentEpisodeId, casts, directorName, new Date, 3, [], [], episode.number, episodeData.title, episodeData.plot, episodeData.poster, episodeData.year, episodeData.language, episodeData.country);
+      this.contentService.updateContentWithActors(completeContent).subscribe({
         next: (data) => {
-
+          alert('Update successfully completed.');
         }
       });
     }
@@ -333,31 +335,20 @@ export class ShowEpisodesComponents implements OnInit {
       let contentId: string = Math.random().toString(36).substring(2, 11);
 
       //Director
-      let directorId: number = 0;
-      if (episodeData.director != null) {
-        this.movieCasts.forEach(element => {
-          if (element.name == episodeData.director) {
-            directorId = element.id;
-          }
-        });
-      }
+      let directorName: string = "";
+      const writtenName = this.directorSearchCtrl.value?.trim();
+      if(writtenName!=null)
+        directorName=writtenName;
       //Casts
       let movieCastIdList: number[] = [];
       let casts: string[] = [];
       casts = episodeData.casts;
-      casts.forEach(element => {
-        this.movieCasts.forEach(movieCast => {
-          if (movieCast.name == element) {
-            movieCastIdList.push(movieCast.id);
-          }
-        });
-      });
 
 
-      let dtoEpisode: DtoEpisode = new DtoEpisode(contentId, movieCastIdList, directorId, new Date, episodeData.title, episodeData.plot, episodeData.poster, episodeData.year, episodeData.language, episodeData.country, this.idFromUrl);
-      this.contentService.addEpisodeToSeason(dtoEpisode).subscribe({
+      let dtoEpisode: DtoEpisodeWithActors = new DtoEpisodeWithActors(contentId, casts, directorName, new Date, episodeData.title, episodeData.plot, episodeData.poster, episodeData.year, episodeData.language, episodeData.country, this.idFromUrl);
+      this.contentService.addEpisodeWithActorsToSeason(dtoEpisode).subscribe({
         next: (data) => {
-
+          alert('Adding successfully completed.');
         }
       });
 
@@ -397,7 +388,7 @@ export class ShowEpisodesComponents implements OnInit {
                 //Delete Metadata
                 this.metadataService.deleteMetadata(episodeElement.metadataId).subscribe({
                   next: (response) => {
-
+                    alert('Episode deleted successfully.')
                   }
                 });
               }
@@ -432,24 +423,33 @@ export class ShowEpisodesComponents implements OnInit {
 
   // Listeye yeni oyuncu ekleme fonksiyonu (Kural korumalı)
   addCastToForm() {
-    const castName = this.selectedCastControl.value;
-    if (!castName) return;
+    const writtenName = this.castSearchCtrl.value?.trim();
+    if (!writtenName) return;
 
-    // Kural: Aynı oyuncu daha önce eklenmiş mi kontrolü
-    const isAlreadyAdded = this.castsFormArray.value.includes(castName);
-
-    if (isAlreadyAdded) {
-      alert('Bu oyuncu zaten listeye eklenmiş!');
-      this.selectedCastControl.setValue('');
+    const existingNames = this.castsFormArray.value;
+    if (existingNames.includes(writtenName)) {
+      this.resetCastInput();
       return;
     }
 
-    // Değiştirilemez (disabled) kontrol ekliyoruz
-    const control = new FormControl({ value: castName, disabled: true }, Validators.required);
-    this.castsFormArray.push(control);
+    if (this.currentlySelectedCast) {
+      // 1. Durum: Listeden var olan birini seçti
+      this.castsFormArray.push(new FormControl(this.currentlySelectedCast.name));
+      this.resetCastInput();
+    } else {
 
-    // Seçim kutusunu sıfırla
-    this.selectedCastControl.setValue('');
+
+      this.availableCasts.push(writtenName);
+      this.castsFormArray.push(new FormControl(writtenName));
+      this.resetCastInput();
+    }
+  }
+
+  private resetCastInput() {
+    this.castSearchCtrl.setValue('');
+    this.currentlySelectedCast = null;
+    this.filteredCasts = [];
+    this.showCastDropdown = false;
   }
 
   // Eklenen oyuncuyu silme
@@ -463,7 +463,7 @@ export class ShowEpisodesComponents implements OnInit {
     let i: number = 0;
     let j: number = 0;
     let totalepisode: number = 0;
-    let seriesId:string=this.idFromUrl.split("/")[0];
+    let seriesId: string = this.idFromUrl.split("/")[0];
     this.contentService.getSeasonsInformations(seriesId, Number(this.idFromUrl.split("/")[1])).subscribe({
       next: (data) => {
         let episodes: any[] = data.Episodes;
@@ -491,5 +491,67 @@ export class ShowEpisodesComponents implements OnInit {
       }
     });
 
+  }
+
+  setupDirectorSearch() {
+    this.directorSearchCtrl.valueChanges.pipe(
+      debounceTime(100),
+      distinctUntilChanged()
+    ).subscribe(value => {
+      const searchStr = value?.toLowerCase().trim();
+
+      if (this.selectedDirectorObj && this.selectedDirectorObj.name !== value) {
+        this.selectedDirectorObj = null;
+        this.episodeForm.get('director')?.setValue('');
+      }
+
+      if (!searchStr || searchStr.length < 2) {
+        this.filteredDirectors = [];
+        return;
+      }
+
+      this.filteredDirectors = this.availableCasts.filter(cast =>
+        cast.name.toLowerCase().includes(searchStr)
+      );
+    });
+  }
+
+  selectDirector(cast: any) {
+    this.selectedDirectorObj = cast;
+    this.directorSearchCtrl.setValue(cast.name, { emitEvent: false });
+    this.episodeForm.get('director')?.setValue(cast.name); // İster cast.id ister cast.name verin
+    this.showDirectorDropdown = false;
+  }
+
+  // === FRONTEND CAST ARAMA ===
+  setupCastSearch() {
+    this.castSearchCtrl.valueChanges.pipe(
+      debounceTime(100),
+      distinctUntilChanged()
+    ).subscribe(value => {
+      const searchStr = value?.toLowerCase().trim();
+
+      if (this.currentlySelectedCast && this.currentlySelectedCast.name !== value) {
+        this.currentlySelectedCast = null;
+      }
+
+      if (!searchStr || searchStr.length < 2) {
+        this.filteredCasts = [];
+        return;
+      }
+
+      // Halihazırda eklenmiş olan isimleri dizide gösterme
+      const existingNames = this.castsFormArray.value;
+
+      this.filteredCasts = this.availableCasts.filter(cast =>
+        cast.name.toLowerCase().includes(searchStr) && !existingNames.includes(cast.name)
+      );
+    });
+  }
+
+  selectCastFromDropdown(cast: any) {
+    this.castSearchCtrl.setValue(cast.name, { emitEvent: false });
+    this.currentlySelectedCast = cast;
+    this.showCastDropdown = false;
   }
 }

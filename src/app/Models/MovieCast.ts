@@ -1,8 +1,8 @@
 
 export interface MovieCast{
     id:number;
-    name:String;
-    poster:String;
+    name:string;
+    poster:string;
     contentIdList:string[];
     castType:number;
 }
