@@ -242,7 +242,7 @@ export class ShowEpisodesComponents implements OnInit {
     return casts;
   }
 
- 
+
 
   loadDirector(directorId: number): String {
     let director: String = "";
@@ -301,112 +301,59 @@ export class ShowEpisodesComponents implements OnInit {
 
     //Find Episode
     let episode: any;
-    this.contents.forEach(element => {
-      if (element.id == this.currentEpisodeId) {
-        episode = element;
+    let episodeId: string = "";
+    if (this.currentEpisodeId != null)
+      episodeId = this.currentEpisodeId;
+    this.contentService.getContentById(episodeId).subscribe({
+      next: (data) => {
+        episode = data;
+
+        //Director
+        let directorName: string = "";
+        const writtenName = this.directorSearchCtrl.value?.trim();
+        if (writtenName != null)
+          directorName = writtenName;
+        //Casts
+        let movieCastIdList: number[] = [];
+        let casts: string[] = [];
+        casts = episodeData.casts;
+
+
+        if (this.isEditMode && this.currentEpisodeId) {
+
+          let completeContent: DtoAddContent = new DtoAddContent(this.currentEpisodeId, casts, directorName, new Date, 3, [], [], episode.number, episodeData.title, episodeData.plot, episodeData.poster, episodeData.year, episodeData.language, episodeData.country);
+          this.contentService.updateContentWithActors(completeContent).subscribe({
+            next: (data) => {
+              alert('Update successfully completed.');
+            }
+          });
+        }
+        else {
+
+          let contentId: string = Math.random().toString(36).substring(2, 11);
+
+          let dtoEpisode: DtoEpisodeWithActors = new DtoEpisodeWithActors(contentId, casts, directorName, new Date, episodeData.title, episodeData.plot, episodeData.poster, episodeData.year, episodeData.language, episodeData.country, this.idFromUrl);
+          this.contentService.addEpisodeWithActorsToSeason(dtoEpisode).subscribe({
+            next: (data) => {
+              alert('Adding successfully completed.');
+            }
+          });
+
+        }
       }
-    });
-
-    if (this.isEditMode && this.currentEpisodeId) {
-
-      console.log(episodeData);
-
-      //Director
-      let directorName: string = "";
-      const writtenName = this.directorSearchCtrl.value?.trim();
-      if(writtenName!=null)
-        directorName=writtenName;
-      //Casts
-      let movieCastIdList: number[] = [];
-      let casts: string[] = [];
-      casts = episodeData.casts;
-      
-
-      let completeContent: DtoAddContent = new DtoAddContent(this.currentEpisodeId, casts, directorName, new Date, 3, [], [], episode.number, episodeData.title, episodeData.plot, episodeData.poster, episodeData.year, episodeData.language, episodeData.country);
-      this.contentService.updateContentWithActors(completeContent).subscribe({
-        next: (data) => {
-          alert('Update successfully completed.');
-        }
-      });
-    }
-    else {
-
-      console.log(episodeData);
-      let contentId: string = Math.random().toString(36).substring(2, 11);
-
-      //Director
-      let directorName: string = "";
-      const writtenName = this.directorSearchCtrl.value?.trim();
-      if(writtenName!=null)
-        directorName=writtenName;
-      //Casts
-      let movieCastIdList: number[] = [];
-      let casts: string[] = [];
-      casts = episodeData.casts;
+    })
 
 
-      let dtoEpisode: DtoEpisodeWithActors = new DtoEpisodeWithActors(contentId, casts, directorName, new Date, episodeData.title, episodeData.plot, episodeData.poster, episodeData.year, episodeData.language, episodeData.country, this.idFromUrl);
-      this.contentService.addEpisodeWithActorsToSeason(dtoEpisode).subscribe({
-        next: (data) => {
-          alert('Adding successfully completed.');
-        }
-      });
-
-    }
   }
 
   deleteEpisode(id: string | undefined) {
     if (!id) return;
 
-    //Update Season
-
-    //Find Season
-    this.contents.forEach(seasonElement => {
-      if (seasonElement.id == this.idFromUrl) {
-
-        let episodeList: string[] = seasonElement.episodeList;
-        const index = episodeList.findIndex(episode => episode === id);
-        if (index !== -1) {
-          episodeList.splice(index, 1);
-        }
-
-        let season = new DtoContent(seasonElement.id, seasonElement.metadataId, seasonElement.movieCastIdList, seasonElement.directorId, seasonElement.created_at, seasonElement.contentType, [], episodeList, seasonElement.number)
-        this.contentService.updateContent(season).subscribe({
-          next: (response) => {
-
-          }
-        })
-
-        //Find Episode
-        this.contents.forEach(episodeElement => {
-          if (episodeElement.id == id) {
-
-
-            //Delete Content
-            this.contentService.deleteContent(id).subscribe({
-              next: (response) => {
-                //Delete Metadata
-                this.metadataService.deleteMetadata(episodeElement.metadataId).subscribe({
-                  next: (response) => {
-                    alert('Episode deleted successfully.')
-                  }
-                });
-              }
-            });
-          }
-        });
+    this.contentService.deleteEpisode(this.idFromUrl,id).subscribe({
+      next:(data)=>{
+         alert('Episode deleted successfully.');
       }
-
-
-
-
-
-
-    });
-
-
-
-
+    })
 
 
 

@@ -101,4 +101,8 @@ export class ContentService {
      public getSeasonsBySeriesId(id: String): Observable<DtoContentComplete[]> {
         return this.http.get<DtoContentComplete[]>(`${this.apiUrl}/get-seasons-by-series-id/${id}`);
     }
+
+     public deleteEpisode(seasonId: string,episodeId:string): Observable<boolean> {
+        return this.http.delete<boolean>(`${this.apiUrl}/delete-episode?seasonId=${seasonId}&episodeId=${episodeId}`);
+    }
 }
