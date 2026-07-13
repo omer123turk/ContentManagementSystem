@@ -1,0 +1,141 @@
+<div class="add-container">
+    <div class="search-container">
+        <div class="searchAndListCast">
+            <div class="search-form">
+                <h3>Find Content</h3>
+                <div class="input-group">
+                    <input type="text" [(ngModel)]="searchQuery" placeholder="Enter Id" (keyup.enter)="onSearch()" />
+                    <button (click)="onSearch()" [disabled]="isLoading">
+                        {{ isLoading ? 'Serching...' : 'Find' }}
+                    </button>
+                </div>
+                @if (isLoading) {
+                <div class="status-message info">Searching</div>
+                }
+                @else {
+                <div class="status-message info">Found</div>
+                }
+
+                @if (errorMessage) {
+                <div class="status-message error">{{ errorMessage }}</div>
+                }
+            </div>
+            @if(isfoundMovie){
+            <div class="casts-section">
+                <h3>Casts</h3>
+                <form [formGroup]="cardForm">
+
+                    <div class="grid-container" formArrayName="cards">
+
+                        @for (kart of cardArray.controls; track kart; let i = $index) {
+                        <div class="card" [formGroupName]="i">
+
+                            <input type="hidden" formControlName="id">
+
+                            <div class="input-group">
+                                <input type="text" [id]="i" formControlName="value">
+                            </div>
+
+
+                        </div>
+                        }
+
+                    </div>
+
+                    <div class="actions">
+                        <button type="button" class="btn-ekle" (click)="addNewCart()">+ Yeni Kart Ekle</button>
+                    </div>
+
+                </form>
+
+            </div>
+
+            }
+
+        </div>
+    </div>
+
+    <div class="form-container">
+        <h2>Add New Movie / Series </h2>
+
+        @if (successMessageContent) {
+        <div class="alert alert-success">{{ successMessageContent }}</div>
+        }
+
+
+        <div class="form-wrapper">
+            <h2>Entity Management Form</h2>
+
+            <form [formGroup]="contentForm" (ngSubmit)="manuelAdd()" class="grid-form">
+
+                <div class="form-group">
+                    <label for="contentId">Id</label>
+                    <input id="contentId" type="text" formControlName="contentId" class="form-control" />
+                </div>
+
+                <div class="form-group">
+                    <label for="selectedContentType">Content Type</label>
+                    <select id="contentTypeSelect" formControlName="selectedContentType" class="form-control">
+                        <option value="0">Movie</option>
+                        <option value="1">Series</option>
+                        <option value="2">Season</option>
+                        <option value="3">Episode</option>
+
+                    </select>
+
+                </div>
+
+                <div class="form-group">
+                    <label for="year">Created At (Year)</label>
+                    <input type="text" formControlName="year" placeholder="2010">
+
+                </div>
+                <div class="form-group">
+                    <label for="created_at">Created At (year-month-day)</label>
+                    <input type="text" formControlName="created_at" placeholder="2010-10-24">
+
+                </div>
+                <div class="form-group">
+                    <label for="title">Title</label>
+                    <input type="text" id="title" formControlName="title" placeholder="Title">
+
+                </div>
+                <div class="form-group">
+                    <label for="plot">Plot</label>
+                    <input type="text" id="plot" formControlName="plot" placeholder="Plot">
+
+                </div>
+                <div class="form-group">
+                    <label for="poster">Poster</label>
+                    <input type="text" id="poster" formControlName="poster" placeholder="Poster">
+
+                </div>
+                <div class="form-group">
+                    <label for="language">Language</label>
+                    <input type="text" id="language" formControlName="language" placeholder="Language">
+
+                </div>
+                <div class="form-group">
+                    <label for="country">Country</label>
+                    <input type="text" id="country" formControlName="country" placeholder="Country">
+
+                </div>
+                <div class="form-group">
+                    <label for="director">Director</label>
+                    <input type="text" id="director" formControlName="director" placeholder="director">
+
+                </div>
+
+                <div class="button-group">
+                    <button type="submit" [disabled]="contentForm.invalid" class="btn-submit">
+                        Add
+                    </button>
+                </div>
+
+            </form>
+        </div>
+
+
+    </div>
+</div>
+<app-loading-component [isLoading]="showLoading" [message]="loadingMessage"></app-loading-component>

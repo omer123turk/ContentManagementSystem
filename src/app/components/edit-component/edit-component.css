@@ -1,0 +1,200 @@
+:host {
+  display: block;
+  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  background-color: #f8f9fa;
+  min-height: 100vh;
+  padding: 2rem 1rem;
+}
+
+.edit-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+@media (max-width: 920px) {
+  .edit-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Kart Yapıları */
+.form-card, .casts-card {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+  padding: 2rem;
+  border: 1px solid #eaeaea;
+}
+
+h2, h3 {
+  margin-top: 0;
+  color: #212529;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid #f1f3f5;
+  padding-bottom: 0.75rem;
+}
+
+/* Grid Düzeni */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group.full-width {
+  grid-column: span 2;
+}
+
+@media (max-width: 600px) {
+  .form-group.full-width, .form-grid {
+    grid-template-columns: 1fr;
+    grid-column: span 1;
+  }
+}
+
+/* Input ve Select Stil Tanımlamaları */
+label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #495057;
+}
+
+input[type="text"],
+input[type="date"],
+select,
+textarea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 0.95rem;
+  border: 1px solid #ced4da;
+  border-radius: 8px;
+  background-color: #fff;
+  color: #495057;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  box-sizing: border-box;
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: #3b82f6;
+  outline: 0;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+textarea {
+  resize: vertical;
+}
+
+/* Butonlar */
+.btn-submit {
+  grid-column: span 2;
+  margin-top: 1.5rem;
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  padding: 0.85rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  width: 100%;
+}
+
+.btn-submit:hover {
+  background-color: #2563eb;
+}
+
+/* Cast Ekleme Havuzu */
+.cast-add-pool {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.select-wrapper {
+  flex: 1;
+}
+
+.btn-add-cast {
+  background-color: #10b981;
+  color: white;
+  border: none;
+  padding: 0 1.25rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+  transition: background-color 0.2s;
+}
+
+.btn-add-cast:hover {
+  background-color: #059669;
+}
+
+/* Cast Listesi ve Chip (Rozet) Tasarımı */
+.casts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 350px;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+}
+
+.cast-chip {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #f1f3f5;
+  padding: 0.65rem 1rem;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  transition: background-color 0.2s;
+}
+
+.cast-chip:hover {
+  background-color: #e9ecef;
+}
+
+.cast-name {
+  font-size: 0.9rem;
+  color: #343a40;
+  font-weight: 500;
+}
+
+.btn-remove-cast {
+  background: none;
+  border: none;
+  color: #adb5bd;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 0.25rem;
+  line-height: 1;
+  transition: color 0.2s;
+}
+
+.btn-remove-cast:hover {
+  color: #dc3545;
+}
+
+.empty-message {
+  color: #868e96;
+  font-size: 0.9rem;
+  text-align: center;
+  margin: 2rem 0;
+  font-style: italic;
+}

@@ -1,0 +1,201 @@
+<div class="page-wrapper">
+    <div class="toggle-container">
+        <button class="toggle-btn" [class.active]="activeContentType === 'movies'" (click)="setContentType('movies')">
+            <i class="bi bi-film"></i> Movies
+        </button>
+
+        <button class="toggle-btn" [class.active]="activeContentType === 'series'" (click)="setContentType('series')">
+            <i class="bi bi-tv"></i> Series
+        </button>
+    </div>
+
+    <div class="content-area">
+
+        @if (activeContentType === 'movies') {
+        <div class="content-card">
+            <h2>Movies Management</h2>
+            @if (isLoading) {
+            <div class="loading-spinner">
+                <p>Loading...</p>
+            </div>
+            }
+            @else {
+            <div class="table-container">
+                <table class="management-table">
+                    <thead>
+                        <tr>
+                            <th>Poster</th>
+                            <th>Title</th>
+                            <th>Year</th>
+                            <th>Director</th>
+                            <th>Casts</th>
+                            <th>Language</th>
+                            <th>Country</th>
+                            <th>Plot</th>
+                            <th class="text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (content of movieContents; track content.id) {
+                        <tr>
+                            <td class="td-poster">
+                                @if (getDirectorById(content.directorId) && getCastsById(content.id)) {}
+                                <img [src]="content.poster || 'https://via.placeholder.com/40x60'" alt="Poster">
+                            </td>
+                            <td class="td-title"><strong>{{ content.title }}</strong></td>
+                            <td>{{ content.year }}</td>
+                            <td>{{ findDirector?.name || '-' }}</td>
+                            <td class="td-casts">
+                                <div class="cast-badges">
+                                    @for (moviecast of findMovieCastList; track moviecast.id) {
+                                    <span class="cast-badge">{{ moviecast.name }}</span>
+                                    } @empty { - }
+                                </div>
+                            </td>
+                            <td>{{ content.language }}</td>
+                            <td>{{ content.country }}</td>
+                            <td class="td-plot" title="{{ content.plot }}">{{ content.plot }}</td>
+                            <td class="text-right whitespace-nowrap">
+                                <div class="table-actions">
+                                    <button class="btn btn-edit" [routerLink]="['/edit-content', content.id]">
+                                        Edit
+                                    </button>
+                                    <button class="btn btn-delete" (click)="onDelete(content.id)">
+                                        Delete
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        } @empty {
+                        <tr>
+                            <td colspan="9" class="empty-table-message">No movies found.</td>
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="pagination-container">
+                <div class="pagination-info">
+                    Showing <strong>{{ (currentPage - 1) * pageSize + 1 }}</strong> -
+                    <strong>{{ Math.min(currentPage * pageSize, totalElements) }}</strong> of
+                    <strong>{{ totalElements }}</strong> items
+                </div>
+
+                <div class="pagination-controls">
+                    <button class="btn-page" [disabled]="currentPage === 1" (click)="onPageChange(currentPage - 1)">
+                        <i class="bi bi-chevron-left"></i> Previous
+                    </button>
+
+                    @for (page of pageNumbers; track page) {
+                    <button class="btn-page" [class.active]="currentPage === page" (click)="onPageChange(page)">
+                        {{ page }}
+                    </button>
+                    }
+
+                    <button class="btn-page" [disabled]="currentPage === totalPages"
+                        (click)="onPageChange(currentPage + 1)">
+                        Next <i class="bi bi-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+            }
+        </div>
+        }
+
+        @else if (activeContentType === 'series') {
+        <div class="content-card">
+            <h2>Series Management</h2>
+            @if (isLoading) {
+            <div class="loading-spinner">
+                <p>Loading...</p>
+            </div>
+            }
+            @else {
+            <div class="table-container">
+                <table class="management-table">
+                    <thead>
+                        <tr>
+                            <th>Poster</th>
+                            <th>Title</th>
+                            <th>Year</th>
+                            <th>Director</th>
+                            <th>Casts</th>
+                            <th>Language</th>
+                            <th>Country</th>
+                            <th>Plot</th>
+                            <th class="text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (content of seriesContents; track content.id) {
+
+                        <tr>
+                            <td class="td-poster">
+                                @if (getDirectorById(content.directorId) && getCastsById(content.id)) {}
+                                <img [src]="content.poster || 'https://via.placeholder.com/40x60'" alt="Poster">
+                            </td>
+                            <td class="td-title"><strong>{{ content.title }}</strong></td>
+                            <td>{{ content.year }}</td>
+                            <td>{{ findDirector?.name || '-' }}</td>
+                            <td class="td-casts">
+                                <div class="cast-badges">
+                                    @for (moviecast of findMovieCastList; track moviecast.id) {
+                                    <span class="cast-badge">{{ moviecast.name }}</span>
+                                    } @empty { - }
+                                </div>
+                            </td>
+                            <td>{{ content.language }}</td>
+                            <td>{{ content.country }}</td>
+                            <td class="td-plot" title="{{ content.plot }}">{{ content.plot }}</td>
+                            <td class="text-right whitespace-nowrap">
+                                <div class="table-actions">
+                                    <button class="btn btn-edit" [routerLink]="['/edit-content', content.id]">
+                                        Edit
+                                    </button>
+                                    <button class="btn btn-delete" (click)="onDelete(content.id)">
+                                        Delete
+                                    </button>
+                                    <button class="btn btn-seasons" [routerLink]="['/go-seasons', content.id]">
+                                        Go Seasons
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        } @empty {
+                        <tr>
+                            <td colspan="9" class="empty-table-message">No series found.</td>
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="pagination-container">
+                <div class="pagination-info">
+                    Showing <strong>{{ (currentPage - 1) * pageSize + 1 }}</strong> -
+                    <strong>{{ Math.min(currentPage * pageSize, totalElements) }}</strong> of
+                    <strong>{{ totalElements }}</strong> items
+                </div>
+
+                <div class="pagination-controls">
+                    <button class="btn-page" [disabled]="currentPage === 1" (click)="onPageChange(currentPage - 1)">
+                        <i class="bi bi-chevron-left"></i> Previous
+                    </button>
+
+                    @for (page of pageNumbers; track page) {
+                    <button class="btn-page" [class.active]="currentPage === page" (click)="onPageChange(page)">
+                        {{ page }}
+                    </button>
+                    }
+
+                    <button class="btn-page" [disabled]="currentPage === totalPages"
+                        (click)="onPageChange(currentPage + 1)">
+                        Next <i class="bi bi-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+            }
+        </div>
+        }
+
+    </div>
+</div>

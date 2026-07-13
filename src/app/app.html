@@ -1,0 +1,42 @@
+<div class="app-container">
+  
+  <nav class="navbar">
+    <div class="nav-side"></div>
+    <div class="nav-center">
+      <h1 class="nav-title">Content Management System</h1>
+    </div>
+    <div class="nav-side"></div>
+  </nav>
+
+  <div class="main-layout">
+    
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h3>Menu</h3>
+      </div>
+
+      <nav class="sidebar-menu">
+        <button routerLink="/all-list" class="nav-btn">
+          <span>Contents</span>
+        </button>
+
+        <button routerLink="/add-content" class="nav-btn">
+          <span>Add Content</span>
+        </button>
+
+        <button routerLink="/all-casts" class="nav-btn">
+          <span>All Casts</span>
+        </button>
+
+      </nav>
+
+      
+    </aside>
+
+    <main class="main-content">
+      <router-outlet></router-outlet>
+      
+      </main>
+
+  </div>
+</div>

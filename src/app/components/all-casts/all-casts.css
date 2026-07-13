@@ -1,0 +1,207 @@
+/* Genel Sayfa Kapsayıcısı */
+.container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1.5rem;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* Başlık ve Buton Alanı */
+.header-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.header-actions h2 {
+    font-size: 1.5rem;
+    color: #212529;
+    margin: 0;
+    font-weight: 600;
+}
+
+/* Yeni Cast Ekleme Butonu */
+.btn-add {
+    background-color: #0d6efd;
+    color: #ffffff;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.btn-add:hover {
+    background-color: #0b5ed7;
+}
+
+/* Tablo Kapsayıcısı */
+.table-container {
+    width: 100%;
+    overflow-x: auto;
+    background: #ffffff;
+    border-radius: 8px 8px 0 0;
+    border: 1px solid #eef2f5;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+/* HTML Yönetim Tablosu */
+.management-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 0.92rem;
+    color: #495057;
+}
+
+.management-table th {
+    background-color: #f8f9fa;
+    color: #343a40;
+    font-weight: 600;
+    padding: 1rem;
+    border-bottom: 2px solid #dee2e6;
+    white-space: nowrap;
+}
+
+.management-table td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #eef2f5;
+    vertical-align: middle;
+}
+
+.management-table tbody tr:hover {
+    background-color: #fcfdfd;
+}
+
+/* Oyuncu Poster Hücresi */
+.td-poster img {
+    width: 42px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 4px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+    display: block;
+}
+
+/* Oyuncu İsmi Hücresi */
+.td-title {
+    color: #212529;
+    font-weight: 600;
+    min-width: 150px;
+}
+
+/* İçerik Listesi Hücresi (Uzun yazılarda taşmayı önler ve üç nokta koyar) */
+.td-plot {
+    max-width: 300px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #6c757d;
+}
+
+/* Yardımcı Hizalama Sınıfları */
+.text-right { text-align: right !important; }
+.whitespace-nowrap { white-space: nowrap; }
+
+/* Tablo İçi Aksiyon Butonları */
+.table-actions {
+    display: inline-flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+}
+
+.btn {
+    padding: 0.45rem 0.85rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+/* Düzenle Butonu */
+.btn-edit {
+    background-color: #e3f2fd;
+    color: #0d6efd;
+}
+.btn-edit:hover { 
+    background-color: #bbdefb; 
+}
+
+/* Sil Butonu */
+.btn-delete {
+    background-color: #ffebee;
+    color: #dc3545;
+}
+.btn-delete:hover { 
+    background-color: #ffcdd2; 
+}
+
+/* Boş Tablo Mesaj Alanı */
+.empty-table-message {
+    text-align: center;
+    padding: 3rem !important;
+    color: #6c757d;
+    font-style: italic;
+    background-color: #ffffff;
+}
+
+/* --- ÖZEL SAYFALAMA (PAGINATION) ALANI --- */
+.pagination-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: #ffffff;
+    border: 1px solid #eef2f5;
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    font-size: 0.88rem;
+    color: #6c757d;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.pagination-controls {
+    display: flex;
+    gap: 0.35rem;
+}
+
+/* Sayfalama Butonları */
+.btn-page {
+    background: #ffffff;
+    border: 1px solid #ced4da;
+    color: #495057;
+    padding: 0.4rem 0.75rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.btn-page:hover:not([disabled]) {
+    background-color: #f8f9fa;
+    border-color: #b5bbc1;
+    color: #212529;
+}
+
+/* Aktif Sayfa Butonu */
+.btn-page.active {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+    color: #ffffff;
+}
+
+/* Pasif (Tıklanamaz) Sayfa Butonu */
+.btn-page[disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: #f8f9fa;
+    border-color: #e9ecef;
+    color: #6c757d;
+}

@@ -1,0 +1,290 @@
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatButtonModule } from '@angular/material/button';
+import { MovieCast } from '../../../Models/MovieCast';
+import { Metadata } from '../../../Models/Metadata';
+import { Content } from '../../../Models/Content';
+import { ContentService } from '../../../Services/content.service';
+import { MetadataService } from '../../../Services/metadata.service';
+import { MovieCastService } from '../../../Services/movie-cast.service';
+import { DtoMovieCastUpdate } from '../../../Models/DtoMovieCastUpdate';
+
+@Component({
+  selector: 'app-cast-pop-up',
+  imports: [CommonModule,
+    ReactiveFormsModule,
+    MatDialogModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatButtonModule],
+  templateUrl: './cast-pop-up.html',
+  styleUrl: './cast-pop-up.css',
+  changeDetection: ChangeDetectionStrategy.Eager
+})
+export class CastPopUp {
+
+  contents: Content[] = [];
+  metadatas: Metadata[] = [];
+  movieCasts: MovieCast[] = [];
+  castForm!: FormGroup;
+
+  assignedContents: string[] = [];
+  unassignedContents: string[] = [];
+
+  selectedContentToAdd: string = '';
+
+  constructor(
+    private fb: FormBuilder,
+    private dialogRef: MatDialogRef<CastPopUp>,
+    @Inject(MAT_DIALOG_DATA) public data: MovieCast | null,
+    private contentService: ContentService,
+    private metadataService: MetadataService,
+    private movieCastService: MovieCastService,
+    private cdr: ChangeDetectorRef,
+  ) { }
+
+
+  getDatas() {
+    let contentList: string[] = [];
+
+    this.data?.contentIdList.forEach(castElement => {
+      this.metadatas.forEach(metadataElement => {
+        if (metadataElement.contentId == castElement) {
+          contentList.push(metadataElement.title);
+        }
+      });
+
+    });
+    console.log(this.data?.name);
+
+
+
+
+    // 2. Eğer Düzenleme (Edit) modundaysak mevcut verileri dolduruyoruz
+    if (this.data && contentList) {
+      this.assignedContents = [...contentList];
+    } else {
+      this.assignedContents = [];
+    }
+
+    // 3. Görev alınmayan içerikleri hesapla (Tüm içerikler - Görev alınanlar)
+    this.updateUnassignedList();
+
+  }
+
+  getAllContents() {
+    this.contentService.getAllContents().subscribe({
+      next: (data) => {
+        this.contents = data;
+        console.log("success");
+        this.getAllMetadatas();
+
+
+      },
+      error: (err) => {
+        console.error("API Hatası:", err);
+      }
+    });
+  }
+
+  getAllMetadatas() {
+    this.metadataService.getAllMetadatas().subscribe({
+      next: (data) => {
+        this.metadatas = data;
+        console.log("success");
+        this.getDatas();
+
+      },
+      error: (err) => {
+        console.error("API Hatası:", err);
+      }
+    });
+  }
+
+  getAllCasts() {
+    this.movieCastService.getAllCasts().subscribe({
+      next: (data) => {
+        this.movieCasts = data;
+        console.log("success");
+
+      },
+      error: (err) => {
+        console.error("API Hatası:", err);
+      }
+    });
+  }
+
+
+  ngOnInit(): void {
+    let castType: string;
+    if (this.data?.castType == 0)
+      castType = "Actor";
+    else if (this.data?.castType == 1)
+      castType = "Director";
+    else
+      castType = "Both";
+
+
+    this.castForm = this.fb.group({
+      name: [this.data?.name || '', Validators.required],
+      poster: [this.data?.poster || '', Validators.required],
+      castType: [castType, Validators.required]
+    });
+    this.getAllContents();
+    this.getAllCasts();
+
+  }
+
+  // Görev almadığı içerikler listesini güncelleyen fonksiyon
+  updateUnassignedList(): void {
+
+    this.metadatas.forEach(element => {
+      if (!this.assignedContents.includes(element.title)) {
+        this.unassignedContents.push(element.title);
+      }
+    });
+
+
+    this.selectedContentToAdd = ''; // Seçimi sıfırla
+  }
+
+  // "Add Content" butonuna basılınca tetiklenen fonksiyon
+  addContent(): void {
+    if (this.selectedContentToAdd) {
+      // Görev alınanlar listesine ekle
+      this.assignedContents.push(this.selectedContentToAdd);
+      // Listeleri yeniden güncelle
+      this.updateUnassignedList();
+    }
+  }
+
+  onSubmit(): void {
+
+    if (this.castForm.valid) {
+
+      let contentIdList: string[] = [];
+      this.assignedContents.forEach(element => {
+        this.metadatas.forEach(metadataElement => {
+          if (element == metadataElement.title) {
+            contentIdList.push(metadataElement.contentId);
+          }
+        });
+      });
+
+      let movieCastUpdate: DtoMovieCastUpdate = this.castForm.value;
+      let castType = this.castForm.value;
+
+
+      movieCastUpdate.contentIdList = contentIdList;
+
+      if (castType.castType == "Actor")
+        movieCastUpdate.castType = 0;
+      else if (castType.castType == "Director")
+        movieCastUpdate.castType = 1;
+      else
+        movieCastUpdate.castType = 2;
+
+
+      let id: number = 0;
+
+
+      if (this.data != null) {
+        //Update Cast
+
+
+        movieCastUpdate.id = this.data.id;
+
+        this.movieCastService.updateCast(movieCastUpdate).subscribe({
+          next: (data) => {
+            console.log("success");
+            id = data.id;
+
+            //Update Content
+            this.contents.forEach(contentElement => {
+              contentIdList.forEach(contentId => {
+                if (contentId == contentElement.id) {
+
+                  if (!contentElement.movieCastIdList.includes(id)) {
+                    contentElement.movieCastIdList.push(id);
+                    this.contentService.updateContent(contentElement).subscribe({
+                      next: (data) => {
+                        console.log(data.id);
+                      },
+                      error: (err) => {
+                        console.error("API Hatası:", err);
+                      }
+                    });
+
+
+                  }
+                }
+              });
+            });
+
+          },
+          error: (err) => {
+            console.error("API Hatası:", err);
+          }
+        });
+      }else{
+
+         //Save Cast
+        this.movieCastService.addCast(movieCastUpdate).subscribe({
+          next: (data) => {
+            console.log("success");
+            id = data.id;
+
+            //Update Content
+            this.contents.forEach(contentElement => {
+              contentIdList.forEach(contentId => {
+                if (contentId == contentElement.id) {
+
+                  if (!contentElement.movieCastIdList.includes(id)) {
+                    contentElement.movieCastIdList.push(id);
+                    this.contentService.updateContent(contentElement).subscribe({
+                      next: (data) => {
+                        console.log(data.id);
+                      },
+                      error: (err) => {
+                        console.error("API Hatası:", err);
+                      }
+                    });
+
+
+                  }
+                }
+              });
+            });
+
+          },
+          error: (err) => {
+            console.error("API Hatası:", err);
+          }
+        });
+
+      }
+
+
+
+
+
+     
+
+
+
+      this.dialogRef.close(movieCastUpdate);
+    }
+
+  }
+
+  onCancel(): void {
+    this.dialogRef.close(null);
+  }
+
+}

@@ -1,0 +1,74 @@
+<div class="container">
+  <div class="header-actions">
+    <h2>Cast Management</h2>
+    <button class="btn-add" (click)="openAddDialog()">+ Add New Cast</button>
+  </div>
+
+  <div class="table-container">
+    <table class="management-table">
+      <thead>
+        <tr>
+          <th>Poster</th>
+          <th>Name</th>
+          <th>Cast Type</th>
+          <th>Content List</th>
+          <th class="text-right">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (element of casts; track element.id) {
+        <tr>
+          <td class="td-poster">
+            <img [src]="element.poster || 'https://via.placeholder.com/42x60?text=No+Poster'" 
+                 alt="{{element.name}} Poster"
+                 (error)="element.poster='https://via.placeholder.com/42x60?text=No+Poster'">
+          </td>
+          <td class="td-title"><strong>{{ element.name }}</strong></td>
+          <td>{{ getCastType(element.castType) }}</td>
+          <td class="td-plot" title="{{ getContentNames(element.contentIdList).join(', ') }}">
+            {{ getContentNames(element.contentIdList).join(', ') || '-' }}
+          </td>
+          <td class="text-right whitespace-nowrap">
+            <div class="table-actions">
+              <button class="btn btn-edit" (click)="openEditDialog(element)">
+                Edit
+              </button>
+              <button class="btn btn-delete" (click)="deleteCast(element.id)">
+                Delete
+              </button>
+            </div>
+          </td>
+        </tr>
+        } @empty {
+        <tr>
+          <td colspan="5" class="empty-table-message">No casts found. Click 'Add New Cast' to create one.</td>
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <div class="pagination-container">
+    <div class="pagination-info">
+      Showing <strong>{{ (currentPage - 1) * pageSize + 1 }}</strong> - 
+      <strong>{{ Math.min(currentPage * pageSize, totalElements) }}</strong> of 
+      <strong>{{ totalElements }}</strong> casts
+    </div>
+    
+    <div class="pagination-controls">
+      <button class="btn-page" [disabled]="currentPage === 1" (click)="onPageChange(currentPage - 1)">
+        Previous
+      </button>
+
+      @for (page of pageNumbers; track page) {
+        <button class="btn-page" [class.active]="currentPage === page" (click)="onPageChange(page)">
+          {{ page }}
+        </button>
+      }
+
+      <button class="btn-page" [disabled]="currentPage === totalPages" (click)="onPageChange(currentPage + 1)">
+        Next
+      </button>
+    </div>
+  </div>
+</div>

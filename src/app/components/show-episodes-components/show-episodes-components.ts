@@ -1,0 +1,495 @@
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators, FormControl } from '@angular/forms';
+import { Content } from '../../Models/Content';
+import { ContentService } from '../../Services/content.service';
+import { MetadataService } from '../../Services/metadata.service';
+import { MovieCastService } from '../../Services/movie-cast.service';
+import { Metadata } from '../../Models/Metadata';
+import { MovieCast } from '../../Models/MovieCast';
+import { HttpErrorResponse } from '@angular/common/http';
+import { ActivatedRoute } from '@angular/router';
+import { DtoContent } from '../../Models/DtoContent';
+import { DtoMetadata } from '../../Models/DtoMetadata';
+import { DtoMetadataUpdate } from '../../Models/DtoMetadataUpdate';
+import { DtoEpisode } from '../../Models/DtoEpisode';
+import { DtoContentComplete } from '../../Models/DtoContentComplete';
+import { DtoAllEpisode } from '../../Models/DtoAllEpisode';
+
+interface Episode {
+  id: string;
+  title: string;
+  plot: String;
+  poster: String;
+  year: String;
+  language: String;
+  country: String;
+  casts: String[];
+  director: String;
+}
+
+@Component({
+  selector: 'app-show-episodes-components',
+  imports: [CommonModule, ReactiveFormsModule],
+  templateUrl: './show-episodes-components.html',
+  styleUrl: './show-episodes-components.css',
+  changeDetection: ChangeDetectionStrategy.Eager
+})
+export class ShowEpisodesComponents implements OnInit {
+
+  isLoading: boolean = false;
+  episodeContents: Content[] = [];
+  episodeForm!: FormGroup;
+  contents: Content[] = [];
+  metadatas: Metadata[] = [];
+  movieCasts: MovieCast[] = [];
+  idFromUrl: string = "";
+  season: any;
+  episodes: Episode[] = [];
+
+
+  // Backend'den gelen tüm oyuncular ve seçilen oyuncunun geçici state'i
+  availableCasts: MovieCast[] = [];
+  selectedCastControl = new FormControl(''); // Select kutusunun değerini tutar
+
+  // Pop-up kontrolcüleri
+  isModalOpen = false;
+  isEditMode = false;
+  currentEpisodeId?: string;
+
+  // --- SAYFALAMA DEĞİŞKENLERİ ---
+  currentPage: number = 1;     // Aktif Sayfa (1'den başlar)
+  pageSize: number = 10;       // Sayfa başına gösterilecek kayıt sayısı
+  totalElements: number = 0;   // Backend'den dönecek toplam kayıt sayısı
+  totalPages: number = 0;      // Toplam sayfa sayısı
+  pageNumbers: number[] = [];  // Sayfa numaraları dizisi [1, 2, 3...]
+
+  protected Math = Math;
+
+  constructor(
+    private contentService: ContentService,
+    private metadataService: MetadataService,
+    private movieCastService: MovieCastService,
+    private fb: FormBuilder,
+    private route: ActivatedRoute,
+    private cdr: ChangeDetectorRef
+
+  ) { }
+
+  public getAllContents(): void {
+    this.contentService.getAllContents().subscribe({
+      next: (data) => {
+        this.contents = data;
+        console.log("success");
+        this.getAllMetadatas();
+      },
+      error: (err) => {
+        console.error("API Hatası:", err);
+
+      }
+    });
+
+  }
+
+  public getAllMetadatas(): void {
+    this.metadataService.getAllMetadatas().subscribe(
+      (response: Metadata[]) => {
+        this.metadatas = response;
+        this.getAllCasts();
+      },
+      (error: HttpErrorResponse) => {
+        alert(error.message);
+      }
+    )
+  }
+
+  public getAllCasts(): void {
+    this.movieCastService.getAllCasts().subscribe(
+      (response: MovieCast[]) => {
+        this.movieCasts = response;
+        this.loadEpisodes();
+        this.loadAvailableCasts();
+      },
+      (error: HttpErrorResponse) => {
+        alert(error.message);
+      }
+    )
+  }
+
+
+  ngOnInit(): void {
+    this.initForm();
+
+    const idFromUrln = this.route.snapshot.paramMap.get('id');
+    if (idFromUrln != null) {
+      this.idFromUrl = idFromUrln;
+    }
+
+    this.getAllContents();
+
+  }
+
+  initForm() {
+    this.episodeForm = this.fb.group({
+      title: ['', Validators.required],
+      plot: [''],
+      poster: [''],
+      year: [new Date().getFullYear()],
+      language: [''],
+      country: [''],
+      casts: this.fb.array([]),
+      director: ['']
+    });
+  }
+
+
+  loadEpisodes(): void {
+    this.isLoading = true;
+
+    // Spring Boot genellikle sayfa indeksini 0 tabanlı bekler: (this.currentPage - 1)
+    const pageParam = this.currentPage - 1;
+
+    this.contentService.getPageEpisodeContentBySeason(this.idFromUrl, pageParam, this.pageSize)
+      .subscribe({
+        next: (response: any) => {
+          // Backend'den Page formatında dönen veri ({ content: [], totalElements: X, totalPages: Y })
+          this.episodeContents=[];
+          this.episodeContents = response.content;
+          console.log(response);
+          this.totalElements = response.totalElements;
+          this.totalPages = response.totalPages;
+
+          this.generatePageNumbers();
+          this.loadEpisodesInformations();
+        },
+        error: (err) => {
+          console.error('Bölümler yüklenirken hata:', err);
+          this.isLoading = false;
+        }
+      });
+  }
+
+  generatePageNumbers(): void {
+    this.pageNumbers = [];
+    for (let i = 1; i <= this.totalPages; i++) {
+      this.pageNumbers.push(i);
+    }
+  }
+
+  onPageChange(page: number): void {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.loadEpisodes(); // Sayfa değiştikçe backend'den yeni veriyi çek
+    }
+  }
+
+
+  loadEpisodesInformations() {
+    this.episodes=[];
+    this.episodeContents.forEach(contentElement => {
+      this.metadatas.forEach(metadataElement => {
+        if (metadataElement.id == contentElement.metadataId) {
+
+          this.episodes.push({
+            id: contentElement.id,
+            title: metadataElement.title,
+            plot: metadataElement.plot,
+            poster: metadataElement.poster,
+            year: metadataElement.year,
+            language: metadataElement.language,
+            country: metadataElement.country,
+            casts: this.loadCasts(contentElement.movieCastIdList),
+            director: this.loadDirector(contentElement.directorId)
+          })
+        }
+      });
+    });
+
+    this.isLoading = false;
+    this.cdr.detectChanges();
+    this.cdr.markForCheck();
+  }
+
+  loadCasts(moviecastIdList: number[]): String[] {
+    let casts: String[] = [];
+    moviecastIdList.forEach(Id => {
+      this.movieCasts.forEach(cast => {
+        if (cast.id == Id) {
+          casts.push(cast.name);
+        }
+      });
+    });
+
+
+    return casts;
+  }
+
+  getEpisodeCasts(id: string) {
+    this.contents.forEach(element => {
+      if (element.id == id) {
+        element.movieCastIdList.forEach(castElement => {
+
+        });
+      }
+    });
+  }
+
+  loadDirector(directorId: number): String {
+    let director: String = "";
+    this.movieCasts.forEach(element => {
+      if (element.id == directorId) {
+        director = element.name;
+      }
+    });
+    return director;
+  }
+
+  openAddModal() {
+    this.isEditMode = false;
+    this.currentEpisodeId = undefined;
+    this.episodeForm.reset({ year: new Date().getFullYear() });
+    this.castsFormArray.clear(); // Listeyi temizle
+    this.selectedCastControl.setValue('');
+    this.isModalOpen = true;
+  }
+
+  openEditModal(episode: Episode) {
+    this.isEditMode = true;
+    this.currentEpisodeId = episode.id;
+    this.selectedCastControl.setValue('');
+
+    // Formun diğer alanlarını doldur
+    this.episodeForm.patchValue({
+      title: episode.title,
+      plot: episode.plot,
+      poster: episode.poster,
+      year: episode.year,
+      language: episode.language,
+      country: episode.country,
+      director: episode.director
+    });
+
+    // FormArray'i doldurma (Gelen cast array'ini form control'lerine çeviriyoruz)
+    this.castsFormArray.clear();
+    if (episode.casts && Array.isArray(episode.casts)) {
+      episode.casts.forEach(castName => {
+        this.castsFormArray.push(
+          new FormControl({ value: castName, disabled: true }, Validators.required)
+        );
+      });
+    }
+
+    this.isModalOpen = true;
+  }
+
+  closeModal() {
+    this.isModalOpen = false;
+  }
+
+  onSubmit() {
+    if (this.episodeForm.invalid) return;
+
+    const episodeData = this.episodeForm.getRawValue();
+
+    //Find Episode
+    let episode: any;
+    this.contents.forEach(element => {
+      if (element.id == this.currentEpisodeId) {
+        episode = element;
+      }
+    });
+
+    if (this.isEditMode && this.currentEpisodeId) {
+
+      console.log(episodeData);
+
+      //Director
+      let directorId: number = 0;
+      if (episodeData.director != null) {
+        directorId = Number(episodeData.director);
+      }
+      //Casts
+      let movieCastIdList: number[] = [];
+      let casts: string[] = [];
+      casts = episodeData.casts;
+      casts.forEach(element => {
+        this.movieCasts.forEach(movieCast => {
+          if (movieCast.name == element) {
+            movieCastIdList.push(movieCast.id);
+          }
+        });
+      });
+
+      let completeContent: DtoContentComplete = new DtoContentComplete(this.currentEpisodeId, movieCastIdList, directorId, new Date, 3, [], [], episode.number, episodeData.title, episodeData.plot, episodeData.poster, episodeData.year, episodeData.language, episodeData.country);
+      this.contentService.updateCompleteContent(completeContent).subscribe({
+        next: (data) => {
+
+        }
+      });
+    }
+    else {
+
+      console.log(episodeData);
+      let contentId: string = Math.random().toString(36).substring(2, 11);
+
+      //Director
+      let directorId: number = 0;
+      if (episodeData.director != null) {
+        this.movieCasts.forEach(element => {
+          if (element.name == episodeData.director) {
+            directorId = element.id;
+          }
+        });
+      }
+      //Casts
+      let movieCastIdList: number[] = [];
+      let casts: string[] = [];
+      casts = episodeData.casts;
+      casts.forEach(element => {
+        this.movieCasts.forEach(movieCast => {
+          if (movieCast.name == element) {
+            movieCastIdList.push(movieCast.id);
+          }
+        });
+      });
+
+
+      let dtoEpisode: DtoEpisode = new DtoEpisode(contentId, movieCastIdList, directorId, new Date, episodeData.title, episodeData.plot, episodeData.poster, episodeData.year, episodeData.language, episodeData.country, this.idFromUrl);
+      this.contentService.addEpisodeToSeason(dtoEpisode).subscribe({
+        next: (data) => {
+
+        }
+      });
+
+    }
+  }
+
+  deleteEpisode(id: string | undefined) {
+    if (!id) return;
+
+    //Update Season
+
+    //Find Season
+    this.contents.forEach(seasonElement => {
+      if (seasonElement.id == this.idFromUrl) {
+
+        let episodeList: string[] = seasonElement.episodeList;
+        const index = episodeList.findIndex(episode => episode === id);
+        if (index !== -1) {
+          episodeList.splice(index, 1);
+        }
+
+        let season = new DtoContent(seasonElement.id, seasonElement.metadataId, seasonElement.movieCastIdList, seasonElement.directorId, seasonElement.created_at, seasonElement.contentType, [], episodeList, seasonElement.number)
+        this.contentService.updateContent(season).subscribe({
+          next: (response) => {
+
+          }
+        })
+
+        //Find Episode
+        this.contents.forEach(episodeElement => {
+          if (episodeElement.id == id) {
+
+
+            //Delete Content
+            this.contentService.deleteContent(id).subscribe({
+              next: (response) => {
+                //Delete Metadata
+                this.metadataService.deleteMetadata(episodeElement.metadataId).subscribe({
+                  next: (response) => {
+
+                  }
+                });
+              }
+            });
+          }
+        });
+      }
+
+
+
+
+
+
+    });
+
+
+
+
+
+
+
+  }
+
+  get castsFormArray(): FormArray {
+    return this.episodeForm.get('casts') as FormArray;
+  }
+
+  loadAvailableCasts() {
+    this.availableCasts = this.movieCasts;
+  }
+
+
+  // Listeye yeni oyuncu ekleme fonksiyonu (Kural korumalı)
+  addCastToForm() {
+    const castName = this.selectedCastControl.value;
+    if (!castName) return;
+
+    // Kural: Aynı oyuncu daha önce eklenmiş mi kontrolü
+    const isAlreadyAdded = this.castsFormArray.value.includes(castName);
+
+    if (isAlreadyAdded) {
+      alert('Bu oyuncu zaten listeye eklenmiş!');
+      this.selectedCastControl.setValue('');
+      return;
+    }
+
+    // Değiştirilemez (disabled) kontrol ekliyoruz
+    const control = new FormControl({ value: castName, disabled: true }, Validators.required);
+    this.castsFormArray.push(control);
+
+    // Seçim kutusunu sıfırla
+    this.selectedCastControl.setValue('');
+  }
+
+  // Eklenen oyuncuyu silme
+  removeCastFromForm(index: number) {
+    this.castsFormArray.removeAt(index);
+  }
+
+  fetchSeasonDataFromBackend(): void {
+
+    let episodeList: DtoAllEpisode[] = [];
+    let i: number = 0;
+    let j: number = 0;
+    let totalepisode: number = 0;
+    let seriesId:string=this.idFromUrl.split("/")[0];
+    this.contentService.getSeasonsInformations(seriesId, Number(this.idFromUrl.split("/")[1])).subscribe({
+      next: (data) => {
+        let episodes: any[] = data.Episodes;
+        totalepisode += episodes.length;
+        episodes.forEach(episode => {
+          this.metadataService.getMetadataInformations(episode.imdbID).subscribe({
+            next: (episodeData) => {
+              let seasonId: number = Number(episodeData.Season);
+              let allEpisode: DtoAllEpisode = new DtoAllEpisode(episode.imdbID, episodeData.Actors, episodeData.Director, new Date, episodeData.Title, episodeData.Plot, episodeData.Poster, episodeData.Year, episodeData.Language, episodeData.Country, this.idFromUrl);
+              episodeList.push(allEpisode);
+              j++;
+              if (totalepisode == j) {
+                this.contentService.addAllEpisodes(episodeList).subscribe({
+                  next: (data) => {
+                    this.cdr.detectChanges();
+                    this.cdr.markForCheck();
+                  }
+                })
+              }
+
+            }
+          })
+
+        });
+      }
+    });
+
+  }
+}

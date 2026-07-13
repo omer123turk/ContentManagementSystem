@@ -1,0 +1,179 @@
+<div class="container">
+    <div class="header-actions">
+        <h2>Episodes Management</h2>
+        <button class="btn-add" (click)="openAddModal()">+ Add Episode</button>
+        <button class="btn-fetch" (click)="fetchSeasonDataFromBackend()">
+        <i class="bi bi-cloud-download"></i> Fetch Season Data
+      </button>
+    </div>
+
+    @if (isLoading) {
+    <div class="loading-spinner">
+        <p>Loading episodes...</p>
+    </div>
+    }
+    @else {
+    <div class="table-container">
+        <table class="management-table">
+            <thead>
+                <tr>
+                    <th>Poster</th>
+                    <th>Title</th>
+                    <th>Year</th>
+                    <th>Director</th>
+                    <th>Casts</th>
+                    <th>Language</th>
+                    <th>Country</th>
+                    <th>Plot</th>
+                    <th class="text-right">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (episode of episodes; track episode.id) {
+                <tr>
+                    <td class="td-poster">
+                        <img [src]="episode.poster || 'https://via.placeholder.com/42x60?text=No+Poster'" alt="Poster">
+                    </td>
+                    <td class="td-title"><strong>{{ episode.title }}</strong></td>
+                    <td>{{ episode.year }}</td>
+                    <td>{{ episode.director || '-' }}</td>
+                    <td class="td-casts">
+                        <span class="episode-casts-text">{{ episode.casts || '-' }}</span>
+                    </td>
+                    <td>{{ episode.language }}</td>
+                    <td>{{ episode.country }}</td>
+                    <td class="td-plot" title="{{ episode.plot }}">{{ episode.plot }}</td>
+                    <td class="text-right whitespace-nowrap">
+                        <div class="table-actions">
+                            <button class="btn btn-edit" (click)="openEditModal(episode)">
+                                Edit
+                            </button>
+                            <button class="btn btn-delete" (click)="deleteEpisode(episode.id)">
+                                Delete
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                } @empty {
+                <tr>
+                    <td colspan="9" class="empty-table-message">No episodes found. Click 'Add Episode' to create one.</td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="pagination-container">
+        <div class="pagination-info">
+            Showing <strong>{{ (currentPage - 1) * pageSize + 1 }}</strong> - 
+            <strong>{{ Math.min(currentPage * pageSize, totalElements) }}</strong> of 
+            <strong>{{ totalElements }}</strong> episodes
+        </div>
+        
+        <div class="pagination-controls">
+            <button class="btn-page" [disabled]="currentPage === 1" (click)="onPageChange(currentPage - 1)">
+                Previous
+            </button>
+
+            @for (page of pageNumbers; track page) {
+                <button class="btn-page" [class.active]="currentPage === page" (click)="onPageChange(page)">
+                    {{ page }}
+                </button>
+            }
+
+            <button class="btn-page" [disabled]="currentPage === totalPages" (click)="onPageChange(currentPage + 1)">
+                Next
+            </button>
+        </div>
+    </div>
+    }
+</div>
+
+@if (isModalOpen) {
+<div class="modal-backdrop">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>{{ isEditMode ? 'Edit Episode' : 'Add New Episode' }}</h2>
+            <button class="close-x" (click)="closeModal()">&times;</button>
+        </div>
+
+        <form [formGroup]="episodeForm" (ngSubmit)="onSubmit()" class="modal-form">
+            <div class="form-group">
+                <label>Title</label>
+                <input type="text" formControlName="title" placeholder="Episode Title">
+            </div>
+
+            <div class="form-group">
+                <label>Plot / Description</label>
+                <textarea formControlName="plot" rows="3" placeholder="Enter episode synopsis..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Poster URL</label>
+                <input type="text" formControlName="poster" placeholder="https://image-url.com/poster.jpg">
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Year</label>
+                    <input type="number" formControlName="year">
+                </div>
+                <div class="form-group">
+                    <label>Language</label>
+                    <input type="text" formControlName="language" placeholder="English">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Country</label>
+                    <input type="text" formControlName="country" placeholder="USA">
+                </div>
+                
+                <div class="form-group">
+                    <label>Director</label>
+                    <select formControlName="director" class="cast-select" style="width: 100%; height: 38px;">
+                        <option value="" disabled selected>Select a director...</option>
+                        @for (cast of availableCasts; track cast.id) {
+                            <option [value]="cast.name">{{ cast.name }}</option>
+                        }
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group cast-management-section">
+                <label>Cast Management</label>
+
+                <div class="cast-input-group">
+                    <select [formControl]="selectedCastControl" class="cast-select">
+                        <option value="" disabled selected>Select a cast member...</option>
+                        @for (cast of availableCasts; track cast.id) {
+                        <option [value]="cast.name">{{ cast.name }}</option>
+                        }
+                    </select>
+                    <button type="button" class="btn-add-cast" (click)="addCastToForm()">+ Add Cast</button>
+                </div>
+
+                <div class="added-casts-tags">
+                    @for (castControl of castsFormArray.controls; track $index) {
+                    <div class="cast-tag">
+                        <input type="text" [formControl]="$any(castControl)" class="cast-tag-input">
+                        <button type="button" class="btn-remove-cast"
+                            (click)="removeCastFromForm($index)">&times;</button>
+                    </div>
+                    } @empty {
+                    <p class="no-cast-msg">No casts added yet.</p>
+                    }
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn-cancel" (click)="closeModal()">Cancel</button>
+                <button type="submit" class="btn-submit" [disabled]="episodeForm.invalid">
+                    {{ isEditMode ? 'Update' : 'Save' }}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+}

@@ -1,0 +1,20 @@
+<div class="container">
+  <div class="season-page-header">
+    <h1>@if(metadata!=null){{{metadata.title}}}</h1>
+    
+    <div class="header-actions">
+      <button class="btn-add" (click)="addSeason()">+ Add New Season</button>
+    </div>
+  </div>
+
+  <div class="season-flex-container">
+    @for (season of seasons; track season.id) {
+      <div class="season-card">
+        <h3 class="season-title">{{ season.name }}</h3>
+        <button class="btn-go" [routerLink]="['/go-episodes', season.id]">Go Episodes</button>
+      </div>
+    } @empty {
+      <p class="empty-message">No Season found. Click 'Fetch Season Data' or 'Add New Season' to load.</p>
+    }
+  </div>
+</div>

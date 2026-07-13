@@ -1,0 +1,100 @@
+<div class="form-container">
+  <h2>Add New Content</h2>
+  
+  <form [formGroup]="mediaForm" (ngSubmit)="onSubmit()">
+    
+    <div class="form-group">
+      <label for="title">Title *</label>
+      <input id="title" type="text" formControlName="title" placeholder="Title">
+      <div *ngIf="mediaForm.get('title')?.touched && mediaForm.get('title')?.errors?.['required']" class="error-msg">
+        Title is required.
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="contentType">Content Type</label>
+      <select id="contentType" formControlName="contentType">
+        <option value="Movie">Movie</option>
+        <option value="Series">Series</option>
+      </select>
+    </div>
+
+    <div class="form-group conditional-box" *ngIf="mediaForm.get('contentType')?.value === 'Series'">
+      <label for="numberOfSeasons">Number of Seasons *</label>
+      <input id="numberOfSeasons" type="number" formControlName="numberOfSeasons" placeholder="Number of Seasons">
+      <div *ngIf="mediaForm.get('numberOfSeasons')?.touched && mediaForm.get('numberOfSeasons')?.errors?.['required']" class="error-msg">
+        For series, number of seasons is required.
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="id">ID / Arama</label>
+      <div class="search-input-group">
+        <input id="id" type="text" formControlName="id" placeholder="İçerik ID girin (Örn: tt1234567)">
+        <button type="button" class="btn-search-id" (click)="searchContentById()">
+          <i class="bi bi-search"></i> Search
+        </button>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="year">Year</label>
+      <input id="year" type="number" formControlName="year" placeholder="Year">
+    </div>
+
+    <div class="form-group">
+      <label for="director">Director</label>
+      <select id="director" formControlName="director">
+        <option value="">Select a Director</option>
+        <option *ngFor="let cast of castList" [value]="cast.id">
+          {{ cast.name }}
+        </option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Casts</label>
+      <div class="cast-selector-wrapper">
+        <select #selectedCast class="cast-select-input">
+          <option value="">Choose a cast member to add...</option>
+          <option *ngFor="let cast of getAvailableCasts()" [value]="cast.id">
+            {{ cast.name }}
+          </option>
+        </select>
+        <button type="button" class="btn-add-cast" (click)="addCastMember(selectedCast.value); selectedCast.value = ''">
+          Add Cast
+        </button>
+      </div>
+
+      <div class="chips-container" *ngIf="selectedCastsList.length > 0">
+        <div class="chip" *ngFor="let cast of selectedCastsList">
+          <span>{{ cast.name }}</span>
+          <button type="button" class="btn-remove-chip" (click)="removeCastMember(cast.id)">&times;</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="plot">Plot</label>
+      <textarea id="plot" formControlName="plot" placeholder="Plot"></textarea>
+    </div>
+
+    <div class="form-group">
+      <label for="poster">Poster URL</label>
+      <input id="poster" type="text" formControlName="poster" placeholder="Poster">
+    </div>
+
+    <div class="form-group">
+      <label for="language">Language</label>
+      <input id="language" type="text" formControlName="language" placeholder="Language">
+    </div>
+
+    <div class="form-group">
+      <label for="country">Country</label>
+      <input id="country" type="text" formControlName="country" placeholder="Country">
+    </div>
+
+    <button type="submit" [disabled]="mediaForm.invalid" class="btn-add">Add</button>
+
+  </form>
+</div>

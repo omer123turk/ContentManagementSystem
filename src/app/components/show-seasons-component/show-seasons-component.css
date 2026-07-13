@@ -1,0 +1,124 @@
+/* Ana Kapsayıcı */
+.container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Üst Buton Alanı */
+.header-actions {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 20px;
+}
+
+.btn-add {
+  background-color: #2ecc71;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: bold;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.btn-add:hover {
+  background-color: #27ae60;
+}
+
+/* Flex Kart Yapısı */
+.season-flex-container {
+  display: flex;
+  flex-wrap: wrap; /* Kartlar sığmadığında alt satıra geçsin */
+  gap: 20px;       /* Kartlar arasındaki boşluk */
+}
+
+/* Sezon Kartı Tasarımı */
+.season-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  
+  /* Esnek genişlik: minimum 250px, boşluk varsa eşit dağılsın */
+  flex: 1 1 250px; 
+  max-width: 350px; 
+  
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.season-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Kart İçeriği */
+.season-title {
+  margin: 0 0 20px 0;
+  font-size: 20px;
+  color: #333;
+}
+
+.btn-go {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  font-size: 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  width: 100%; /* Buton kartı kaplasın */
+  transition: background 0.2s ease;
+}
+
+.btn-go:hover {
+  background-color: #2980b9;
+}
+
+.empty-message {
+  color: #7f8c8d;
+  font-style: italic;
+}
+
+.season-page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid #eef2f5;
+    padding-bottom: 1rem;
+}
+
+.header-actions {
+    display: flex;
+    gap: 12px; /* Butonların arasında boşluk bırakır */
+    align-items: center;
+}
+
+/* Yeni Eklenen Veri Çekme Butonu Stili */
+.btn-fetch {
+    background-color: #198754; /* Yeşil modern başarı rengi */
+    color: #ffffff;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    border-radius: 6px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: background-color 0.15s ease;
+}
+
+.btn-fetch:hover {
+    background-color: #146c43;
+}

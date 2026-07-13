@@ -1,0 +1,53 @@
+<h2 mat-dialog-title>{{ data ? 'Cast Düzenle' : 'Yeni Cast Ekle' }}</h2>
+
+<mat-dialog-content [formGroup]="castForm">
+  <div class="form-container">
+    
+    <mat-form-field appearance="outline">
+      <mat-label>Name</mat-label>
+      <input matInput formControlName="name">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Poster (URL)</mat-label>
+      <input matInput formControlName="poster">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Cast Type</mat-label>
+      <mat-select formControlName="castType">
+        <mat-option value="Actor">Actor</mat-option>
+        <mat-option value="Director">Director</mat-option>
+        <mat-option value="Both">Both</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Görev Aldığı Contentler (Değiştirilemez)</mat-label>
+      <textarea matInput [value]="assignedContents.join(', ')" readonly rows="3"></textarea>
+    </mat-form-field>
+
+    <div class="content-add-section">
+      <mat-form-field appearance="outline" class="select-field">
+        <mat-label>Görev Almadığı Contentler</mat-label>
+        <mat-select [(value)]="selectedContentToAdd">
+          @for (content of unassignedContents; track content) {
+            <mat-option [value]="content">{{ content }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      
+      <button mat-raised-button color="accent" type="button" (click)="addContent()" [disabled]="!selectedContentToAdd">
+        Add Content
+      </button>
+    </div>
+
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()">İptal</button>
+  <button mat-raised-button color="primary" [disabled]="castForm.invalid" (click)="onSubmit()">
+    {{ data ? 'Güncelle' : 'Kaydet' }}
+  </button>
+</mat-dialog-actions>
