@@ -109,4 +109,6 @@ export class ContentService {
       public getContentNames(contentIdList: string[]): Observable<string[]> {
         return this.http.put<string[]>(`${this.apiUrl}/get-content-names`,contentIdList);
     }
+
+    
 }

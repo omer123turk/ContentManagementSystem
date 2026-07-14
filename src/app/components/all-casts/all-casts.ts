@@ -152,7 +152,10 @@ export class AllCasts implements OnInit {
       data: null 
     });
 
+    dialogRef.afterClosed().subscribe((result: DtoMovieCastUpdate) => {
+      this.loadCasts();
 
+    });
   }
 
 
@@ -162,8 +165,8 @@ export class AllCasts implements OnInit {
       data: { ...cast } 
     });
 
-    dialogRef.afterClosed().subscribe((result: DtoMovieCastUpdate) => {
-
+    dialogRef.afterClosed().subscribe(() => {
+      this.loadCasts();
 
     });
   }
@@ -171,36 +174,6 @@ export class AllCasts implements OnInit {
 
   deleteCast(id: number | undefined): void {
     if (!id) return;
-
-    this.casts.forEach(moviecast => {
-      if (moviecast.id == id) {
-        moviecast.contentIdList.forEach(contentId => {
-          this.contents.forEach(content => {
-            if (content.id == contentId) {
-              let i: number = 0;
-              content.movieCastIdList.forEach(element => {
-                if (element == moviecast.id) {
-                  content.movieCastIdList.splice(i, 1);
-
-                }
-                i = i + 1;
-                if (moviecast.castType == 1) {
-                  content.directorId = 0;
-                }
-              });
-
-              this.contentService.updateContent(content).subscribe({
-                next: () => {
-                },
-                error: () => {
-
-                }
-              });
-            }
-          });
-        });
-      }
-    });
 
     if (confirm('Are you sure ?')) {
       this.movieCastService.deleteCast(id).subscribe({

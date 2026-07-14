@@ -84,7 +84,6 @@ export class CastPopUp {
 
 
 
-
   ngOnInit(): void {
     let castType: string;
     if (this.data?.castType == 0)
@@ -114,7 +113,7 @@ export class CastPopUp {
     });
 
 
-    this.selectedContentToAdd = ''; 
+    this.selectedContentToAdd = '';
   }
 
 
@@ -158,9 +157,10 @@ export class CastPopUp {
             console.error("API Hatası:", err);
           }
         });
-      }else{
+      }
+      else {
 
-         //Save Cast
+        //Save Cast
         this.movieCastService.addCastComplete(movieCastUpdate).subscribe({
           next: (data) => {
             console.log("success");
@@ -173,12 +173,6 @@ export class CastPopUp {
         });
 
       }
-
-
-
-
-
-     
 
 
 

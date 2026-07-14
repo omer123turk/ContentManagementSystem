@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormControl } from '@angular/forms';
 import { ContentService } from '../../Services/content.service';
@@ -39,6 +39,7 @@ export class AddContentComponent implements OnInit {
     private contentService: ContentService,
     private movieCastService: MovieCastService,
     private metadataService: MetadataService,
+    private cdr: ChangeDetectorRef
   ) { }
 
   ngOnInit(): void {
@@ -95,18 +96,19 @@ export class AddContentComponent implements OnInit {
     });
   }
 
+  //Seçilebilir castleri bul
   getAvailableCasts(): MovieCast[] {
     return this.castList.filter(cast => !this.selectedCastsList.some(s => s.id === cast.id));
   }
 
-
+  //Casti sil 
   removeCastMember(castId: number): void {
     this.selectedCastsList = this.selectedCastsList.filter(c => c.id !== castId);
 
     this.updateFormCasts();
   }
 
-
+  //cast formunu güncelle
   private updateFormCasts(): void {
     const ids = this.selectedCastsList.map(c => c.id);
     this.mediaForm.get('casts')?.setValue(ids);
@@ -123,14 +125,13 @@ export class AddContentComponent implements OnInit {
           return of([]);
         }
         // Backend servis araması (Kendi API'ne göre uyarla)
-        this.filteredDirectors = [];
-        this.directors.forEach(element => {
-          let name: string = String(value);
-          if (element.name.toLowerCase().includes(name.toLowerCase())) {
-            this.filteredDirectors.push(element);
+        this.movieCastService.getFilteredCasts(value).subscribe({
+          next:(data)=>{
+            this.filteredDirectors=data;
+             this.cdr.detectChanges();
           }
-        });;
-        return this.filteredCasts;
+        })
+        return this.filteredDirectors;
 
       })
     ).subscribe((results: any) => {
@@ -157,12 +158,12 @@ export class AddContentComponent implements OnInit {
         }
 
         this.filteredCasts = [];
-        this.actors.forEach(element => {
-          let name: string = String(value);
-          if (element.name.includes(name)) {
-            this.filteredCasts.push(element);
+         this.movieCastService.getFilteredCasts(value).subscribe({
+          next:(data)=>{
+            this.filteredCasts=data;
+            this.cdr.detectChanges();
           }
-        });;
+        })
         return this.filteredCasts;
       })
     ).subscribe((results: any) => {
@@ -229,6 +230,9 @@ export class AddContentComponent implements OnInit {
         next: (response) => {
           console.log(response);
           this.mediaForm.reset();
+          this.directorSearchCtrl.setValue("");
+          this.selectedCastsList=[];
+          alert('Content added successfully');
         }
       });
     } else {

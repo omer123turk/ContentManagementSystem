@@ -2,9 +2,14 @@
     <div class="header-actions">
         <h2>Episodes Management</h2>
         <button class="btn-add" (click)="openAddModal()">+ Add Episode</button>
-        <button class="btn-fetch" (click)="fetchSeasonDataFromBackend()">
-        <i class="bi bi-cloud-download"></i> Fetch Season Data
-      </button>
+        <button class="btn-fetch" [disabled]="isFetching" (click)="fetchSeasonDataFromBackend()">
+            @if (isFetching) {
+                <span class="btn-spinner"></span>
+                Fetching...
+            } @else {
+                <i class="bi bi-cloud-download"></i> Fetch Season Data
+            }
+        </button>
     </div>
 
     @if (isLoading) {

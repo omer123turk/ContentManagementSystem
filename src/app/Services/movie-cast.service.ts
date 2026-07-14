@@ -50,4 +50,7 @@ export class MovieCastService {
         return this.http.post<MovieCast>(`${this.apiUrl}/add-cast-complete`, movieCast);
     }
 
+    public getFilteredCasts(query: string): Observable<MovieCast[]> {
+        return this.http.get<MovieCast[]>(`${this.apiUrl}/get-filtered-casts?query=${query}`);
+    }
 }

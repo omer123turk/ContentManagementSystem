@@ -78,6 +78,8 @@ export class ShowEpisodesComponents implements OnInit {
   totalPages: number = 0;      
   pageNumbers: number[] = [];  
 
+  isFetching = false;
+
   protected Math = Math;
 
   constructor(
@@ -175,10 +177,14 @@ export class ShowEpisodesComponents implements OnInit {
 
           this.generatePageNumbers();
           this.loadEpisodesInformations();
+          this.cdr.detectChanges();
+          this.cdr.markForCheck();
         },
         error: (err) => {
           console.error('Bölümler yüklenirken hata:', err);
           this.isLoading = false;
+           this.cdr.detectChanges();
+          this.cdr.markForCheck();
         }
       });
   }
@@ -321,6 +327,8 @@ export class ShowEpisodesComponents implements OnInit {
           this.contentService.updateContentWithActors(completeContent).subscribe({
             next: (data) => {
               alert('Update successfully completed.');
+              this.closeModal();
+              this.loadEpisodes();
             }
           });
         }
@@ -400,6 +408,8 @@ export class ShowEpisodesComponents implements OnInit {
 
   fetchSeasonDataFromBackend(): void {
 
+    this.isFetching=true;
+
     let episodeList: DtoAllEpisode[] = [];
     let i: number = 0;
     let j: number = 0;
@@ -419,7 +429,9 @@ export class ShowEpisodesComponents implements OnInit {
               if (totalepisode == j) {
                 this.contentService.addAllEpisodes(episodeList).subscribe({
                   next: (data) => {
+                    this.isFetching=false;
                     alert('Fetching is completed.');
+                    this.getAllContents();
                     this.cdr.detectChanges();
                     this.cdr.markForCheck();
                   }
@@ -452,9 +464,12 @@ export class ShowEpisodesComponents implements OnInit {
         return;
       }
 
-      this.filteredDirectors = this.availableCasts.filter(cast =>
-        cast.name.toLowerCase().includes(searchStr)
-      );
+       this.movieCastService.getFilteredCasts(searchStr).subscribe({
+          next:(data)=>{
+            this.filteredDirectors=data;
+            this.cdr.detectChanges();
+          }
+        })
     });
   }
 
@@ -485,9 +500,12 @@ export class ShowEpisodesComponents implements OnInit {
 
       const existingNames = this.castsFormArray.value;
 
-      this.filteredCasts = this.availableCasts.filter(cast =>
-        cast.name.toLowerCase().includes(searchStr) && !existingNames.includes(cast.name)
-      );
+      this.movieCastService.getFilteredCasts(searchStr).subscribe({
+          next:(data)=>{
+            this.filteredCasts=data;
+            this.cdr.detectChanges();
+          }
+        })
     });
   }
 

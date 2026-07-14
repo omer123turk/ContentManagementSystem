@@ -216,12 +216,12 @@ export class EditComponent implements OnInit {
           return of([]);
         }
         this.filteredDirectors = [];
-        this.allCasts.forEach(element => {
-          let name: string = String(value);
-          if (element.name.toLowerCase().includes(name.toLowerCase().trim())) {
-            this.filteredDirectors.push(element);
+        this.movieCastService.getFilteredCasts(value).subscribe({
+          next:(data)=>{
+            this.filteredDirectors=data;
+             this.cdr.detectChanges();
           }
-        });;
+        })
         return this.filteredCasts;
       })
     ).subscribe((results: any) => {
@@ -249,12 +249,12 @@ export class EditComponent implements OnInit {
           return of([]);
         }
         this.filteredCasts = [];
-        this.allCasts.forEach(element => {
-          let name: string = String(value);
-          if (element.name.includes(name)) {
-            this.filteredCasts.push(element);
+        this.movieCastService.getFilteredCasts(value).subscribe({
+          next:(data)=>{
+            this.filteredCasts=data;
+             this.cdr.detectChanges();
           }
-        });;
+        })
         return this.filteredCasts;
       })
     ).subscribe((results: any) => {
