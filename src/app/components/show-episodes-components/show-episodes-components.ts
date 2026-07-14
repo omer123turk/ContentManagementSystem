@@ -419,6 +419,7 @@ export class ShowEpisodesComponents implements OnInit {
               if (totalepisode == j) {
                 this.contentService.addAllEpisodes(episodeList).subscribe({
                   next: (data) => {
+                    alert('Fetching is completed.');
                     this.cdr.detectChanges();
                     this.cdr.markForCheck();
                   }
