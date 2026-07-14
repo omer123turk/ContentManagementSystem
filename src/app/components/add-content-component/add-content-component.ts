@@ -86,7 +86,6 @@ export class AddContentComponent implements OnInit {
   }
 
   loadCasts(): void {
-    // Backend API'sine istek atan servis fonksiyonun
     this.movieCastService.getAllCasts().subscribe({
       next: (data) => {
         this.castList = data;
@@ -102,30 +101,14 @@ export class AddContentComponent implements OnInit {
     return this.castList.filter(cast => !this.selectedCastsList.some(s => s.id === cast.id));
   }
 
-  // "Add Cast" butonuna basıldığında tetiklenir
-  addCastMember(castId: string): void {
-    if (!castId) return;
 
-    const castMember = this.castList.find(c => c.id === Number(castId));
-    if (castMember && !this.selectedCastsList.some(c => c.id === Number(castId))) {
-      // 1. Ekranda görünecek listeye ekle
-      this.selectedCastsList.push(castMember);
-
-      // 2. Form modelindeki casts array'ini güncelle
-      this.updateFormCasts();
-    }
-  }
-
-  // Chip üzerindeki (x) butonuna basıldığında listeden kaldırır
   removeCastMember(castId: number): void {
-    // 1. Ekran listesinden temizle
     this.selectedCastsList = this.selectedCastsList.filter(c => c.id !== castId);
 
-    // 2. Form modelindeki casts array'ini güncelle
     this.updateFormCasts();
   }
 
-  // Seçili nesnelerin ID'lerini form kontrolüne set eder
+
   private updateFormCasts(): void {
     const ids = this.selectedCastsList.map(c => c.id);
     this.mediaForm.get('casts')?.setValue(ids);
@@ -134,8 +117,8 @@ export class AddContentComponent implements OnInit {
 
   setupDirectorSearch() {
     this.directorSearchCtrl.valueChanges.pipe(
-      debounceTime(400), // Kullanıcı yazmayı bitirdikten 400ms sonra tetiklenir
-      distinctUntilChanged(), // Aynı kelime üst üste gelirse tetiklenmez
+      debounceTime(400),
+      distinctUntilChanged(),
       switchMap(value => {
         if (!value || value.length < 1) {
           this.filteredDirectors = [];
@@ -158,14 +141,13 @@ export class AddContentComponent implements OnInit {
   }
 
   selectDirector(director: any) {
-    // Input alanında seçilen kişinin ismini göster
     this.directorSearchCtrl.setValue(director.name, { emitEvent: false });
-    // Ana formdaki director alanına ID'sini ata
+
     this.mediaForm.get('director')?.setValue(director.id);
     this.showDirectorDropdown = false;
   }
 
-  // === CAST ARAMA MANTIĞI ===
+
   setupCastSearch() {
     this.castSearchCtrl.valueChanges.pipe(
       debounceTime(400),
@@ -177,7 +159,6 @@ export class AddContentComponent implements OnInit {
         }
 
         this.filteredCasts = [];
-        // Backend servis araması (Kendi API'ne göre uyarla)
         this.actors.forEach(element => {
           let name: string = String(value);
           if (element.name.includes(name)) {
@@ -187,7 +168,7 @@ export class AddContentComponent implements OnInit {
         return this.filteredCasts;
       })
     ).subscribe((results: any) => {
-      // Hali hazırda eklenmiş olanları listede tekrar göstermemek için filtreleyebilirsin
+
       if (this.filteredCasts.length > 1)
         this.filteredCasts = results.filter((c: any) => !this.selectedCastsList.some(sc => sc.id === c.id));
     });
@@ -195,7 +176,7 @@ export class AddContentComponent implements OnInit {
 
   selectCastFromDropdown(cast: any) {
     this.castSearchCtrl.setValue(cast.name, { emitEvent: false });
-    this.currentlySelectedCast = cast; // Ekleme butonuna basılmak üzere hafızaya al
+    this.currentlySelectedCast = cast;
     this.showCastDropdown = false;
   }
 
@@ -205,11 +186,10 @@ export class AddContentComponent implements OnInit {
     if (!writtenName) return;
 
     if (this.currentlySelectedCast) {
-      // Listede yoksa ekle
       if (!this.selectedCastsList.some(c => c.id === this.currentlySelectedCast.id)) {
         this.selectedCastsList.push(this.currentlySelectedCast);
       }
-      // Inputu ve geçici seçimi temizle
+
       this.castSearchCtrl.setValue('');
       this.currentlySelectedCast = null;
     }
@@ -268,36 +248,15 @@ export class AddContentComponent implements OnInit {
       return;
     }
 
-    // Kendi içerik servisiniz üzerinden backend API çağrısı
     this.metadataService.getMetadataInformations(contentId).subscribe({
       next: (data: any) => {
         if (data) {
-          // Backend'den gelen verileri reaktif form alanlarına güvenle eşleştiriyoruz
           let contentType: string = "";
           if (data.Type == "movie")
             contentType = "Movie";
           else
             contentType = "Series";
-          //Director
-          let directorId: number = 0;
-          let findDirector: boolean = false;
-          this.castList.forEach(element => {
-            if (element.name == data.Director) {
-              directorId = element.id;
-              findDirector = true;
-            }
-          });
-          if (!findDirector) {
-            let name: string = data.Director;
-            let cast: DtoMovieCast = new DtoMovieCast(name, [], 1, "");
-            this.movieCastService.addCast(cast).subscribe({
-              next: (data) => {
-                let movieCast = { id: data.id, name: name, poster: "", contentIdList: [], castType: 1 };
-                this.castList.push(movieCast);
-                directorId = movieCast.id;
-              }
-            })
-          }
+
 
           this.mediaForm.patchValue({
             title: data.Title || '',
@@ -307,11 +266,15 @@ export class AddContentComponent implements OnInit {
             poster: data.Poster || '',
             language: data.Language || '',
             country: data.Country || '',
-            director: directorId || '',
+            director: '',
             numberOfSeasons: data.totalSeasons
           });
 
-          // Eğer backend'den oyuncu listesi (casts) nesnesi de geliyorsa onları chip listesine ekleyebilirsiniz
+          //Director
+          this.directorSearchCtrl.setValue(data.Director.trim());
+
+
+          //Casts
           let actorsString: string = data.Actors;
           let actorsName: string[] = actorsString.split(', ');
           actorsName.forEach(nameElement => {
