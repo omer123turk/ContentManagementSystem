@@ -111,15 +111,15 @@ export class AllCasts implements OnInit {
   }
 
   loadCasts(): void {
-    const pageParam = this.currentPage - 1; // Backend için 0 tabanlı yapıyoruz
+    const pageParam = this.currentPage - 1; 
     this.movieCastService.getPageCast(pageParam, this.pageSize)
       .subscribe({
         next: (response: any) => {
-          this.casts = response.content; // Doğrudan array'e atıyoruz
+          this.casts = response.content; 
           this.totalElements = response.totalElements;
           this.totalPages = response.totalPages;
 
-          // Sayfa numaralarını üretiyoruz [1, 2, 3...]
+       
           this.pageNumbers = [];
           for (let i = 1; i <= this.totalPages; i++) {
             this.pageNumbers.push(i);
@@ -136,9 +136,7 @@ export class AllCasts implements OnInit {
       });
   }
 
-  /**
-   * Paginator üzerinden sayfa veya sayfa boyutu değiştirildiğinde tetiklenir
-   */
+
   onPageChange(page: number): void {
   if (page >= 1 && page <= this.totalPages) {
     this.currentPage = page;
@@ -151,17 +149,17 @@ export class AllCasts implements OnInit {
   openAddDialog(): void {
     const dialogRef = this.dialog.open(CastPopUp, {
       width: '400px',
-      data: null // Yeni ekleme olduğu için boş gidiyor
+      data: null 
     });
 
 
   }
 
-  // PUT: Cast Düzenleme
+
   openEditDialog(cast: DtoMovieCastUpdate): void {
     const dialogRef = this.dialog.open(CastPopUp, {
       width: '400px',
-      data: { ...cast } // Mevcut bilgileri klonlayarak gönderiyoruz
+      data: { ...cast } 
     });
 
     dialogRef.afterClosed().subscribe((result: DtoMovieCastUpdate) => {
@@ -170,7 +168,7 @@ export class AllCasts implements OnInit {
     });
   }
 
-  // DELETE: Satır Silme
+
   deleteCast(id: number | undefined): void {
     if (!id) return;
 

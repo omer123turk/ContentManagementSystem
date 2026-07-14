@@ -50,10 +50,10 @@ export class ShowEpisodesComponents implements OnInit {
   season: any;
   episodes: Episode[] = [];
 
-  // Elinizdeki mevcut havuz (Mevcut kodunuzdaki isimle eşleşmeli)
+
   availableCasts: any[] = [];
 
-  // Yeni Arama Kontrolleri ve Dropdown Görünürlükleri
+
   directorSearchCtrl = new FormControl('');
   castSearchCtrl = new FormControl('');
 
@@ -62,23 +62,21 @@ export class ShowEpisodesComponents implements OnInit {
   showDirectorDropdown = false;
   showCastDropdown = false;
 
-  // Seçilen geçici nesneler
+
   selectedDirectorObj: any = null;
   currentlySelectedCast: any = null;
 
 
-
-  // Pop-up kontrolcüleri
   isModalOpen = false;
   isEditMode = false;
   currentEpisodeId?: string;
 
-  // --- SAYFALAMA DEĞİŞKENLERİ ---
-  currentPage: number = 1;     // Aktif Sayfa (1'den başlar)
-  pageSize: number = 10;       // Sayfa başına gösterilecek kayıt sayısı
-  totalElements: number = 0;   // Backend'den dönecek toplam kayıt sayısı
-  totalPages: number = 0;      // Toplam sayfa sayısı
-  pageNumbers: number[] = [];  // Sayfa numaraları dizisi [1, 2, 3...]
+
+  currentPage: number = 1;     
+  pageSize: number = 10;       
+  totalElements: number = 0;   
+  totalPages: number = 0;      
+  pageNumbers: number[] = [];  
 
   protected Math = Math;
 
@@ -164,13 +162,11 @@ export class ShowEpisodesComponents implements OnInit {
   loadEpisodes(): void {
     this.isLoading = true;
 
-    // Spring Boot genellikle sayfa indeksini 0 tabanlı bekler: (this.currentPage - 1)
     const pageParam = this.currentPage - 1;
 
     this.contentService.getPageEpisodeContentBySeason(this.idFromUrl, pageParam, this.pageSize)
       .subscribe({
         next: (response: any) => {
-          // Backend'den Page formatında dönen veri ({ content: [], totalElements: X, totalPages: Y })
           this.episodeContents = [];
           this.episodeContents = response.content;
           console.log(response);
@@ -258,7 +254,7 @@ export class ShowEpisodesComponents implements OnInit {
     this.isEditMode = false;
     this.currentEpisodeId = undefined;
     this.episodeForm.reset({ year: new Date().getFullYear() });
-    this.castsFormArray.clear(); // Listeyi temizle
+    this.castsFormArray.clear(); 
     this.isModalOpen = true;
   }
 
@@ -266,7 +262,7 @@ export class ShowEpisodesComponents implements OnInit {
     this.isEditMode = true;
     this.currentEpisodeId = episode.id;
 
-    // Formun diğer alanlarını doldur
+
     this.episodeForm.patchValue({
       title: episode.title,
       plot: episode.plot,
@@ -277,7 +273,7 @@ export class ShowEpisodesComponents implements OnInit {
       director: episode.director
     });
 
-    // FormArray'i doldurma (Gelen cast array'ini form control'lerine çeviriyoruz)
+
     this.castsFormArray.clear();
     if (episode.casts && Array.isArray(episode.casts)) {
       episode.casts.forEach(castName => {
@@ -368,7 +364,6 @@ export class ShowEpisodesComponents implements OnInit {
   }
 
 
-  // Listeye yeni oyuncu ekleme fonksiyonu (Kural korumalı)
   addCastToForm() {
     const writtenName = this.castSearchCtrl.value?.trim();
     if (!writtenName) return;
@@ -380,7 +375,6 @@ export class ShowEpisodesComponents implements OnInit {
     }
 
     if (this.currentlySelectedCast) {
-      // 1. Durum: Listeden var olan birini seçti
       this.castsFormArray.push(new FormControl(this.currentlySelectedCast.name));
       this.resetCastInput();
     } else {
@@ -399,7 +393,7 @@ export class ShowEpisodesComponents implements OnInit {
     this.showCastDropdown = false;
   }
 
-  // Eklenen oyuncuyu silme
+
   removeCastFromForm(index: number) {
     this.castsFormArray.removeAt(index);
   }
@@ -466,11 +460,11 @@ export class ShowEpisodesComponents implements OnInit {
   selectDirector(cast: any) {
     this.selectedDirectorObj = cast;
     this.directorSearchCtrl.setValue(cast.name, { emitEvent: false });
-    this.episodeForm.get('director')?.setValue(cast.name); // İster cast.id ister cast.name verin
+    this.episodeForm.get('director')?.setValue(cast.name);
     this.showDirectorDropdown = false;
   }
 
-  // === FRONTEND CAST ARAMA ===
+
   setupCastSearch() {
     this.castSearchCtrl.valueChanges.pipe(
       debounceTime(100),
@@ -487,7 +481,7 @@ export class ShowEpisodesComponents implements OnInit {
         return;
       }
 
-      // Halihazırda eklenmiş olan isimleri dizide gösterme
+
       const existingNames = this.castsFormArray.value;
 
       this.filteredCasts = this.availableCasts.filter(cast =>

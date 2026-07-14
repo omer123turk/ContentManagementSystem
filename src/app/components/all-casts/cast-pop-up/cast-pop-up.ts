@@ -8,7 +8,6 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MovieCast } from '../../../Models/MovieCast';
 import { Metadata } from '../../../Models/Metadata';
-import { Content } from '../../../Models/Content';
 import { ContentService } from '../../../Services/content.service';
 import { MetadataService } from '../../../Services/metadata.service';
 import { MovieCastService } from '../../../Services/movie-cast.service';
@@ -41,7 +40,6 @@ export class CastPopUp {
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<CastPopUp>,
     @Inject(MAT_DIALOG_DATA) public data: MovieCast | null,
-    private contentService: ContentService,
     private metadataService: MetadataService,
     private movieCastService: MovieCastService,
     private cdr: ChangeDetectorRef,
@@ -59,15 +57,12 @@ export class CastPopUp {
 
 
 
-
-    // 2. Eğer Düzenleme (Edit) modundaysak mevcut verileri dolduruyoruz
     if (this.data && contentList) {
       this.assignedContents = [...contentList];
     } else {
       this.assignedContents = [];
     }
 
-    // 3. Görev alınmayan içerikleri hesapla (Tüm içerikler - Görev alınanlar)
     this.updateUnassignedList();
 
   }
@@ -109,7 +104,7 @@ export class CastPopUp {
 
   }
 
-  // Görev almadığı içerikler listesini güncelleyen fonksiyon
+
   updateUnassignedList(): void {
 
     this.metadatas.forEach(element => {
@@ -119,15 +114,13 @@ export class CastPopUp {
     });
 
 
-    this.selectedContentToAdd = ''; // Seçimi sıfırla
+    this.selectedContentToAdd = ''; 
   }
 
-  // "Add Content" butonuna basılınca tetiklenen fonksiyon
+
   addContent(): void {
     if (this.selectedContentToAdd) {
-      // Görev alınanlar listesine ekle
       this.assignedContents.push(this.selectedContentToAdd);
-      // Listeleri yeniden güncelle
       this.updateUnassignedList();
     }
   }
