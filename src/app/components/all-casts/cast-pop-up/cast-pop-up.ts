@@ -29,9 +29,7 @@ import { DtoMovieCastUpdate } from '../../../Models/DtoMovieCastUpdate';
 })
 export class CastPopUp {
 
-  contents: Content[] = [];
   metadatas: Metadata[] = [];
-  movieCasts: MovieCast[] = [];
   castForm!: FormGroup;
 
   assignedContents: string[] = [];
@@ -53,12 +51,8 @@ export class CastPopUp {
   getDatas() {
     let contentList: string[] = [];
 
-    this.data?.contentIdList.forEach(castElement => {
-      this.metadatas.forEach(metadataElement => {
-        if (metadataElement.contentId == castElement) {
-          contentList.push(metadataElement.title);
-        }
-      });
+    this.data?.contentIdList.forEach(contentElement => {
+      contentList.push(contentElement);
 
     });
     console.log(this.data?.name);
@@ -78,20 +72,6 @@ export class CastPopUp {
 
   }
 
-  getAllContents() {
-    this.contentService.getAllContents().subscribe({
-      next: (data) => {
-        this.contents = data;
-        console.log("success");
-        this.getAllMetadatas();
-
-
-      },
-      error: (err) => {
-        console.error("API Hatası:", err);
-      }
-    });
-  }
 
   getAllMetadatas() {
     this.metadataService.getAllMetadatas().subscribe({
@@ -107,18 +87,7 @@ export class CastPopUp {
     });
   }
 
-  getAllCasts() {
-    this.movieCastService.getAllCasts().subscribe({
-      next: (data) => {
-        this.movieCasts = data;
-        console.log("success");
 
-      },
-      error: (err) => {
-        console.error("API Hatası:", err);
-      }
-    });
-  }
 
 
   ngOnInit(): void {
@@ -136,8 +105,7 @@ export class CastPopUp {
       poster: [this.data?.poster || '', Validators.required],
       castType: [castType, Validators.required]
     });
-    this.getAllContents();
-    this.getAllCasts();
+    this.getAllMetadatas();
 
   }
 
@@ -168,20 +136,10 @@ export class CastPopUp {
 
     if (this.castForm.valid) {
 
-      let contentIdList: string[] = [];
-      this.assignedContents.forEach(element => {
-        this.metadatas.forEach(metadataElement => {
-          if (element == metadataElement.title) {
-            contentIdList.push(metadataElement.contentId);
-          }
-        });
-      });
 
       let movieCastUpdate: DtoMovieCastUpdate = this.castForm.value;
       let castType = this.castForm.value;
-
-
-      movieCastUpdate.contentIdList = contentIdList;
+      movieCastUpdate.contentIdList = this.assignedContents;
 
       if (castType.castType == "Actor")
         movieCastUpdate.castType = 0;
@@ -193,39 +151,14 @@ export class CastPopUp {
 
       let id: number = 0;
 
-
       if (this.data != null) {
+
         //Update Cast
-
-
         movieCastUpdate.id = this.data.id;
 
         this.movieCastService.updateCast(movieCastUpdate).subscribe({
           next: (data) => {
             console.log("success");
-            id = data.id;
-
-            //Update Content
-            this.contents.forEach(contentElement => {
-              contentIdList.forEach(contentId => {
-                if (contentId == contentElement.id) {
-
-                  if (!contentElement.movieCastIdList.includes(id)) {
-                    contentElement.movieCastIdList.push(id);
-                    this.contentService.updateContent(contentElement).subscribe({
-                      next: (data) => {
-                        console.log(data.id);
-                      },
-                      error: (err) => {
-                        console.error("API Hatası:", err);
-                      }
-                    });
-
-
-                  }
-                }
-              });
-            });
 
           },
           error: (err) => {
@@ -235,32 +168,10 @@ export class CastPopUp {
       }else{
 
          //Save Cast
-        this.movieCastService.addCast(movieCastUpdate).subscribe({
+        this.movieCastService.addCastComplete(movieCastUpdate).subscribe({
           next: (data) => {
             console.log("success");
             id = data.id;
-
-            //Update Content
-            this.contents.forEach(contentElement => {
-              contentIdList.forEach(contentId => {
-                if (contentId == contentElement.id) {
-
-                  if (!contentElement.movieCastIdList.includes(id)) {
-                    contentElement.movieCastIdList.push(id);
-                    this.contentService.updateContent(contentElement).subscribe({
-                      next: (data) => {
-                        console.log(data.id);
-                      },
-                      error: (err) => {
-                        console.error("API Hatası:", err);
-                      }
-                    });
-
-
-                  }
-                }
-              });
-            });
 
           },
           error: (err) => {

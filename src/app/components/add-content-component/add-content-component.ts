@@ -1,11 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormControl } from '@angular/forms';
-import { DtoContentComplete } from '../../Models/DtoContentComplete';
 import { ContentService } from '../../Services/content.service';
 import { MovieCastService } from '../../Services/movie-cast.service';
 import { MovieCast } from '../../Models/MovieCast';
-import { Metadata } from '../../Models/Metadata';
 import { MetadataService } from '../../Services/metadata.service';
 import { DtoMovieCast } from '../../Models/DtoMovieCast';
 import { debounceTime, distinctUntilChanged, switchMap, of } from 'rxjs';

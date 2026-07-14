@@ -105,4 +105,8 @@ export class ContentService {
      public deleteEpisode(seasonId: string,episodeId:string): Observable<boolean> {
         return this.http.delete<boolean>(`${this.apiUrl}/delete-episode?seasonId=${seasonId}&episodeId=${episodeId}`);
     }
+
+      public getContentNames(contentIdList: string[]): Observable<string[]> {
+        return this.http.put<string[]>(`${this.apiUrl}/get-content-names`,contentIdList);
+    }
 }

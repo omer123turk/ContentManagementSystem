@@ -47,7 +47,7 @@ export class AllCasts implements OnInit {
   contentList: string[] = [];
 
   isLoading: boolean = false;
-  currentPage: number = 1;     // 1'den başlatıyoruz
+  currentPage: number = 1;     
   pageSize: number = 10;
   totalElements: number = 0;
   totalPages: number = 0;
@@ -97,19 +97,6 @@ export class AllCasts implements OnInit {
     });
   }
 
-  getContentNames(idList: string[]): string[] {
-    this.contentList = [];
-
-    idList.forEach(element => {
-      this.metadatas.forEach(metadataElement => {
-        if (element == metadataElement.contentId) {
-          this.contentList.push(metadataElement.title);
-        }
-      });
-    });
-
-    return this.contentList;
-  }
 
   getCastType(id: number): string {
     if (id == 0) {
@@ -179,15 +166,6 @@ export class AllCasts implements OnInit {
 
     dialogRef.afterClosed().subscribe((result: DtoMovieCastUpdate) => {
 
-      // Backend Güncelleme
-      this.movieCastService.updateCast(result).subscribe({
-        next: () => {
-          this.loadCasts();
-        },
-        error: () => {
-
-        }
-      });
 
     });
   }

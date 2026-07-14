@@ -28,7 +28,7 @@ export class EditComponent implements OnInit {
   // Arama kontrolleri ve dropdown durumları
   directorSearchCtrl = new FormControl('');
   castSearchCtrl = new FormControl('');
-  
+
   filteredDirectors: any[] = [];
   filteredCasts: any[] = [];
   showDirectorDropdown = false;
@@ -59,11 +59,9 @@ export class EditComponent implements OnInit {
 
   }
 
-  /**
-   * Form yapılarını ilklendirir
-   */
+
   private initForms(): void {
-    // Ana Düzenleme Formu
+
     this.editForm = this.fb.group({
       selectedContentType: ['0'],
       year: [''],
@@ -73,10 +71,9 @@ export class EditComponent implements OnInit {
       poster: [''],
       language: [''],
       country: [''],
-      director: [''] // Tek bir Director ID'si tutacak
+      director: ['']
     });
 
-    // Cast Formu (FormArray barındıran yapı)
     this.cardForm = this.fb.group({
       cards: this.fb.array([])
     });
@@ -91,8 +88,7 @@ export class EditComponent implements OnInit {
   private loadInitialData(): void {
     this.isLoading = true;
 
-    // SIMÜLASYON: Backend'den tüm oyuncuların gelmesi
-    // Gerçek projede: this.castService.getAll().subscribe(data => this.allCasts = data);
+
     this.movieCastService.getAllCasts().subscribe({
       next: (data) => {
         this.allCasts = data;
@@ -100,9 +96,6 @@ export class EditComponent implements OnInit {
         this.cdr.markForCheck();
       }
     })
-
-    // SIMÜLASYON: Düzenlenecek içeriğin detaylarının backend'den gelmesi
-    // Gerçek projede: this.contentService.getById(id).subscribe(content => { ... });
 
     let idFromUrln = this.route.snapshot.paramMap.get('id');
 
@@ -112,35 +105,36 @@ export class EditComponent implements OnInit {
     this.contentService.getCompleteContentById(this.idFromUrl).subscribe({
       next: (data) => {
 
+        //Other Informations
+        this.editForm.patchValue({
+          selectedContentType: data.contentType,
+          year: data.year,
+          created_at: data.created_at,
+          title: data.title,
+          plot: data.plot,
+          poster: data.poster,
+          language: data.language,
+          country: data.country,
+          director: ""
+        });
+
+        //Casts
+        data.movieCastIdList.forEach(element => {
+          this.movieCastService.getCastById(element).subscribe({
+            next: (cast) => {
+              this.cardArray.push(this.fb.group({
+                id: [cast.id],
+                value: [cast.name]
+              }));
+            }
+          })
+        });
+
         if (data.directorId != 0) {
           this.movieCastService.getCastById(data.directorId).subscribe({
             next: (director) => {
-              // Ana formu backend'den gelen verilerle dolduruyoruz
-              this.editForm.patchValue({
-                selectedContentType: data.contentType,
-                year: data.year,
-                created_at: data.created_at,
-                title: data.title,
-                plot: data.plot,
-                poster: data.poster,
-                language: data.language,
-                country: data.country,
-              });
 
               this.directorSearchCtrl.setValue(director.name);
-
-              // Mevcut cast'leri FormArray'e dolduruyoruz
-
-              data.movieCastIdList.forEach(element => {
-                this.movieCastService.getCastById(element).subscribe({
-                  next: (cast) => {
-                    this.cardArray.push(this.fb.group({
-                      id: [cast.id],
-                      value: [cast.name]
-                    }));
-                  }
-                })
-              });
 
               this.isLoading = false;
               this.cdr.detectChanges();
@@ -149,37 +143,7 @@ export class EditComponent implements OnInit {
             }
           })
         }
-        else {
-          // Ana formu backend'den gelen verilerle dolduruyoruz
-          this.editForm.patchValue({
-            selectedContentType: data.contentType,
-            year: data.year,
-            created_at: data.created_at,
-            title: data.title,
-            plot: data.plot,
-            poster: data.poster,
-            language: data.language,
-            country: data.country,
-            director: ""
-          });
 
-          // Mevcut cast'leri FormArray'e dolduruyoruz
-          data.movieCastIdList.forEach(element => {
-            this.movieCastService.getCastById(element).subscribe({
-              next: (cast) => {
-                this.cardArray.push(this.fb.group({
-                  id: [cast.id],
-                  value: [cast.name]
-                }));
-
-              }
-            })
-          });
-
-          this.isLoading = false;
-          this.cdr.detectChanges();
-          this.cdr.markForCheck();
-        }
 
 
       }
@@ -190,29 +154,22 @@ export class EditComponent implements OnInit {
 
 
 
-  /**
-   * Seçilen oyuncuyu FormArray listesinden indeksine göre siler
-   */
   removeCast(index: number): void {
     this.cardArray.removeAt(index);
   }
 
-  /**
-   * Update butonuna basıldığında hem ana formu hem de cast listesini birleştirip backend'e gönderir
-   */
+
   update(): void {
     if (this.editForm.invalid) {
       alert('Please fill in all required fields.');
       return;
     }
 
-    // İki formun verilerini tek bir payload altında birleştiriyoruz
     const finalPayload = {
       ...this.editForm.value,
-      casts: this.cardArray.value // [{id: 103, value: 'Cillian Murphy'}, ...] şeklinde gider
+      casts: this.cardArray.value // [{id: 103, value: 'Cillian Murphy'}, ...] 
     };
 
-    console.log('Backend\'e gönderilecek güncel veri:', finalPayload);
 
     let idFromUrln = this.route.snapshot.paramMap.get('id');
 
@@ -225,16 +182,16 @@ export class EditComponent implements OnInit {
       movieCastNameList.push(element.value);
     });
 
-   const writtenName = this.directorSearchCtrl.value?.trim();
-      let directorName:string="";
-      if(writtenName!=null)
-        directorName=writtenName;
+    const writtenName = this.directorSearchCtrl.value?.trim();
+    let directorName: string = "";
+    if (writtenName != null)
+      directorName = writtenName;
 
     this.contentService.getContentById(this.idFromUrl).subscribe({
       next: (data) => {
         let CompleteContent: DtoAddContent = new DtoAddContent(this.idFromUrl, movieCastNameList, directorName, this.editForm.value.created_at, this.editForm.value.selectedContentType, data.seasonList, data.episodeList, data.number, this.editForm.value.title, this.editForm.value.plot, this.editForm.value.poster, this.editForm.value.year, this.editForm.value.language, this.editForm.value.country);
         this.contentService.updateContentWithActors(CompleteContent).subscribe({
-          next:(data)=>{
+          next: (data) => {
             alert('Update successfully completed.');
           }
         });
@@ -245,7 +202,6 @@ export class EditComponent implements OnInit {
   }
 
 
-  // === DIRECTOR ARAMA MANTIĞI ===
   setupDirectorSearch() {
     this.directorSearchCtrl.valueChanges.pipe(
       debounceTime(400),
@@ -292,8 +248,7 @@ export class EditComponent implements OnInit {
           this.filteredCasts = [];
           return of([]);
         }
-       this.filteredCasts = [];
-        // Backend servis araması (Kendi API'ne göre uyarla)
+        this.filteredCasts = [];
         this.allCasts.forEach(element => {
           let name: string = String(value);
           if (element.name.includes(name)) {
@@ -303,7 +258,6 @@ export class EditComponent implements OnInit {
         return this.filteredCasts;
       })
     ).subscribe((results: any) => {
-      // Listede halihazırda ekli olanları dropdown'da gizle
       const existingIds = this.cardArray.value.map((c: any) => c.id);
       this.filteredCasts = results.filter((c: any) => !existingIds.includes(c.id));
     });
@@ -323,7 +277,7 @@ export class EditComponent implements OnInit {
       this.pushCastToFormArray(this.currentlySelectedCast);
       this.resetCastInput();
     } else {
-       this.cardArray.push(new FormGroup({
+      this.cardArray.push(new FormGroup({
         id: new FormControl(0),
         value: new FormControl(writtenName)
       }));

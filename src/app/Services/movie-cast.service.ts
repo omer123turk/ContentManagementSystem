@@ -46,4 +46,8 @@ export class MovieCastService {
         return this.http.get<boolean>(`${this.apiUrl}/update-cast-by-deleted-content/${id}`);
     }
 
+    public addCastComplete(movieCast: DtoMovieCast): Observable<MovieCast> {
+        return this.http.post<MovieCast>(`${this.apiUrl}/add-cast-complete`, movieCast);
+    }
+
 }

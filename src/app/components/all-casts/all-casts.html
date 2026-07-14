@@ -25,8 +25,8 @@
           </td>
           <td class="td-title"><strong>{{ element.name }}</strong></td>
           <td>{{ getCastType(element.castType) }}</td>
-          <td class="td-plot" title="{{ getContentNames(element.contentIdList).join(', ') }}">
-            {{ getContentNames(element.contentIdList).join(', ') || '-' }}
+          <td class="td-plot" title="{{ element.contentIdList.join(', ') }}">
+            {{ element.contentIdList.join(', ') || '-' }}
           </td>
           <td class="text-right whitespace-nowrap">
             <div class="table-actions">
