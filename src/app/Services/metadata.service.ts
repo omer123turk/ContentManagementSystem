@@ -38,5 +38,7 @@ export class MetadataService {
         return this.http.get<any>(`http://www.omdbapi.com/?i=${id}&apikey=357a94f0`)
     }
 
-
+    public getFilteredMetadatas(query:string):Observable<Metadata[]>{
+        return this.http.get<Metadata[]>(`${this.apiUrl}/get-filtered-metadata?query=${query}`);
+    }
 }

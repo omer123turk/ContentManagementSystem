@@ -53,4 +53,8 @@ export class MovieCastService {
     public getFilteredCasts(query: string): Observable<MovieCast[]> {
         return this.http.get<MovieCast[]>(`${this.apiUrl}/get-filtered-casts?query=${query}`);
     }
+
+     public getFilteredDirectors(query: string): Observable<MovieCast[]> {
+        return this.http.get<MovieCast[]>(`${this.apiUrl}/get-filtered-directors?query=${query}`);
+    }
 }

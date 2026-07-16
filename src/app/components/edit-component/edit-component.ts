@@ -119,6 +119,7 @@ export class EditComponent implements OnInit {
         });
 
         //Casts
+        console.log(data.movieCastIdList);
         data.movieCastIdList.forEach(element => {
           this.movieCastService.getCastById(element).subscribe({
             next: (cast) => {
@@ -142,6 +143,10 @@ export class EditComponent implements OnInit {
 
             }
           })
+        } else {
+          this.isLoading = false;
+          this.cdr.detectChanges();
+          this.cdr.markForCheck();
         }
 
 
@@ -216,10 +221,10 @@ export class EditComponent implements OnInit {
           return of([]);
         }
         this.filteredDirectors = [];
-        this.movieCastService.getFilteredCasts(value).subscribe({
-          next:(data)=>{
-            this.filteredDirectors=data;
-             this.cdr.detectChanges();
+        this.movieCastService.getFilteredDirectors(value).subscribe({
+          next: (data) => {
+            this.filteredDirectors = data;
+            this.cdr.detectChanges();
           }
         })
         return this.filteredCasts;
@@ -250,9 +255,9 @@ export class EditComponent implements OnInit {
         }
         this.filteredCasts = [];
         this.movieCastService.getFilteredCasts(value).subscribe({
-          next:(data)=>{
-            this.filteredCasts=data;
-             this.cdr.detectChanges();
+          next: (data) => {
+            this.filteredCasts = data;
+            this.cdr.detectChanges();
           }
         })
         return this.filteredCasts;

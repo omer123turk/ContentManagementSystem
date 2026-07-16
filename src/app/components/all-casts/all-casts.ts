@@ -42,8 +42,6 @@ export class AllCasts implements OnInit {
 
   casts: MovieCast[] = [];
   displayedColumns: string[] = ['name', 'poster', 'castType', 'contentList', 'edit', 'delete'];
-  contents: Content[] = [];
-  metadatas: Metadata[] = [];
   contentList: string[] = [];
 
   isLoading: boolean = false;
@@ -64,38 +62,8 @@ export class AllCasts implements OnInit {
 
   ngOnInit(): void {
     this.loadCasts();
-    this.getAllContents();
   }
 
-
-  getAllContents() {
-    this.contentService.getAllContents().subscribe({
-      next: (data) => {
-        this.contents = data;
-        console.log("success");
-        this.getAllMetadatas();
-
-
-      },
-      error: (err) => {
-        console.error("API Hatası:", err);
-      }
-    });
-  }
-
-  getAllMetadatas() {
-    this.metadataService.getAllMetadatas().subscribe({
-      next: (data) => {
-        this.metadatas = data;
-        console.log("success");
-
-
-      },
-      error: (err) => {
-        console.error("API Hatası:", err);
-      }
-    });
-  }
 
 
   getCastType(id: number): string {

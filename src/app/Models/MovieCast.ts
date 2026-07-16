@@ -5,4 +5,5 @@ export interface MovieCast{
     poster:string;
     contentIdList:string[];
     castType:number;
+    directedContentIdList:string[];
 }

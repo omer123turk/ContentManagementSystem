@@ -125,7 +125,7 @@ export class AddContentComponent implements OnInit {
           return of([]);
         }
         // Backend servis araması (Kendi API'ne göre uyarla)
-        this.movieCastService.getFilteredCasts(value).subscribe({
+        this.movieCastService.getFilteredDirectors(value).subscribe({
           next:(data)=>{
             this.filteredDirectors=data;
              this.cdr.detectChanges();
@@ -193,7 +193,7 @@ export class AddContentComponent implements OnInit {
       this.currentlySelectedCast = null;
     }
     else {
-      let movieCast: MovieCast = { id: 0, name: writtenName, poster: "", contentIdList: [], castType: 0 };
+      let movieCast: MovieCast = { id: 0, name: writtenName, poster: "", contentIdList: [], directedContentIdList:[], castType: 0 };
       this.selectedCastsList.push(movieCast);
       this.castSearchCtrl.setValue('');
       this.currentlySelectedCast = null;
@@ -287,10 +287,10 @@ export class AddContentComponent implements OnInit {
               }
             });
             if (!isFound) {
-              let cast: DtoMovieCast = new DtoMovieCast(nameElement, [], 0, "");
+              let cast: DtoMovieCast = new DtoMovieCast(nameElement, [], 0, "",[]);
               this.movieCastService.addCast(cast).subscribe({
                 next: (data) => {
-                  let movieCast = { id: data.id, name: nameElement, poster: "", contentIdList: [], castType: 0 };
+                  let movieCast = { id: data.id, name: nameElement, poster: "", contentIdList: [], castType: 0,directedContentIdList:[]};
                   this.castList.push(movieCast);
                   this.selectedCastsList.push(movieCast);
                 }

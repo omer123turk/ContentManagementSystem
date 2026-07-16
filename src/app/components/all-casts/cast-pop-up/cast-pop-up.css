@@ -1,24 +1,223 @@
+/* Form Genel Alanı ve Genişlik Ayarı */
 .form-container {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  min-width: 350px;
+  gap: 18px;
+  width: 600px; /* Yatayda genişletilmiş boyut */
+  max-width: 100%;
+  box-sizing: border-box;
   padding-top: 10px;
 }
 
-.content-add-section {
+/* Başlık Tasarımı */
+.dialog-title {
+  font-size: 22px;
+  font-weight: 600;
+  color: #1e293b;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 16px;
+  margin-bottom: 0 !important;
+}
+
+/* Yan Yana Grid Yapısı */
+.form-row {
   display: flex;
-  align-items: center;
-  gap: 10px;
+  gap: 16px;
   width: 100%;
 }
 
-.select-field {
+.flex-1 {
   flex: 1;
 }
 
-textarea[readonly] {
-  background-color: #f5f5f5;
-  color: #666;
-  cursor: not-allowed;
+.full-width {
+  width: 100%;
+}
+
+.url-icon, .search-icon {
+  color: #94a3b8;
+}
+
+/* Atanmış İçerikler Başlık ve Rozet */
+.assigned-contents-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.section-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.badge {
+  background-color: #f1f5f9;
+  color: #475569;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
+/* Tablo Kutusu ve Özel Kaydırma Çubuğu */
+.scrollable-table-wrapper {
+  max-height: 180px;
+  overflow-y: auto;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  background: #ffffff;
+}
+
+/* Chrome, Safari ve Edge için Şık Scrollbar */
+.scrollable-table-wrapper::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollable-table-wrapper::-webkit-scrollbar-track {
+  background: #f8fafc;
+  border-radius: 0 8px 8px 0;
+}
+
+.scrollable-table-wrapper::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.scrollable-table-wrapper::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Tablo Hücreleri ve Satırları */
+.contents-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.contents-table th {
+  background-color: #f8fafc;
+  color: #475569;
+  font-weight: 600;
+  text-align: left;
+  padding: 12px 16px;
+  border-bottom: 1px solid #e2e8f0;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.contents-table td {
+  padding: 10px 16px;
+  color: #334155;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
+}
+
+.contents-table tr:hover {
+  background-color: #f8fafc;
+}
+
+/* Tablo İçi İkon ve Hücre Düzeni */
+.content-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.movie-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  color: #64748b;
+}
+
+.action-column {
+  text-align: right;
+  width: 80px;
+  padding-right: 12px;
+}
+
+/* Çarpı (Silme) Butonu */
+.remove-btn {
+  width: 32px;
+  height: 32px;
+  line-height: 32px;
+  color: #ef4444;
+  transition: all 0.2s ease-in-out;
+}
+
+.remove-btn:hover {
+  background-color: #fee2e2 !important;
+  transform: scale(1.08);
+}
+
+/* Boş Durum Tasarımı */
+.empty-row {
+  text-align: center !important;
+  padding: 28px 16px !important;
+}
+
+.empty-icon {
+  font-size: 28px;
+  width: 28px;
+  height: 28px;
+  color: #94a3b8;
+  margin-bottom: 6px;
+}
+
+.empty-row p {
+  margin: 0;
+  color: #64748b;
+  font-size: 13px;
+}
+
+/* Yeni İçerik Ekleme Satırı */
+.content-add-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.content-add-section .select-field {
+  flex: 1;
+  margin-bottom: -1.25em; /* Angular Material alt boşluk düzeltmesi */
+}
+
+/* Buton Tasarımları */
+.add-btn {
+  height: 52px;
+  border-radius: 8px;
+  font-weight: 500;
+  padding: 0 18px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dialog-actions {
+  border-top: 1px solid #f1f5f9;
+  padding: 16px 24px !important;
+  margin-top: 12px;
+}
+
+.cancel-btn {
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+.submit-btn {
+  border-radius: 8px;
+  font-weight: 500;
+  padding: 0 24px;
 }

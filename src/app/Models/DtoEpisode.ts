@@ -11,6 +11,7 @@ export class DtoEpisode {
     language: string;
     country: string;
     seasonId:string
+    episode:number;
 
     constructor(id: string,
         movieCastIdList: number[],
@@ -23,6 +24,7 @@ export class DtoEpisode {
         language: string,
         country: string,
         seasonId:string,
+         episode:number
     ) {
         this.id = id;
         this.movieCastIdList = movieCastIdList;
@@ -35,5 +37,6 @@ export class DtoEpisode {
         this.language = language;
         this.country = country;
         this.seasonId=seasonId;
+        this.episode=episode;
     }
 }

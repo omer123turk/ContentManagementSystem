@@ -19,15 +19,21 @@
         @for (element of casts; track element.id) {
         <tr>
           <td class="td-poster">
-            <img [src]="element.poster || 'https://via.placeholder.com/42x60?text=No+Poster'" 
-                 alt="{{element.name}} Poster"
-                 (error)="element.poster='https://via.placeholder.com/42x60?text=No+Poster'">
+            <img [src]="element.poster || 'https://via.placeholder.com/42x60?text=No+Poster'"
+              alt="{{element.name}} Poster" (error)="element.poster='https://via.placeholder.com/42x60?text=No+Poster'">
           </td>
           <td class="td-title"><strong>{{ element.name }}</strong></td>
           <td>{{ getCastType(element.castType) }}</td>
+          @if(element.castType==0){
           <td class="td-plot" title="{{ element.contentIdList.join(', ') }}">
             {{ element.contentIdList.join(', ') || '-' }}
           </td>
+          }@else {
+          <td class="td-plot" title="{{ element.directedContentIdList.join(', ') }}">
+            {{ element.directedContentIdList.join(', ') || '-' }}
+          </td>
+          }
+
           <td class="text-right whitespace-nowrap">
             <div class="table-actions">
               <button class="btn btn-edit" (click)="openEditDialog(element)">
@@ -50,20 +56,20 @@
 
   <div class="pagination-container">
     <div class="pagination-info">
-      Showing <strong>{{ (currentPage - 1) * pageSize + 1 }}</strong> - 
-      <strong>{{ Math.min(currentPage * pageSize, totalElements) }}</strong> of 
+      Showing <strong>{{ (currentPage - 1) * pageSize + 1 }}</strong> -
+      <strong>{{ Math.min(currentPage * pageSize, totalElements) }}</strong> of
       <strong>{{ totalElements }}</strong> casts
     </div>
-    
+
     <div class="pagination-controls">
       <button class="btn-page" [disabled]="currentPage === 1" (click)="onPageChange(currentPage - 1)">
         Previous
       </button>
 
       @for (page of pageNumbers; track page) {
-        <button class="btn-page" [class.active]="currentPage === page" (click)="onPageChange(page)">
-          {{ page }}
-        </button>
+      <button class="btn-page" [class.active]="currentPage === page" (click)="onPageChange(page)">
+        {{ page }}
+      </button>
       }
 
       <button class="btn-page" [disabled]="currentPage === totalPages" (click)="onPageChange(currentPage + 1)">

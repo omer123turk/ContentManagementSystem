@@ -43,7 +43,7 @@ export class ShowEpisodesComponents implements OnInit {
   isLoading: boolean = false;
   episodeContents: Content[] = [];
   episodeForm!: FormGroup;
-  contents: Content[] = [];
+
   metadatas: Metadata[] = [];
   movieCasts: MovieCast[] = [];
   idFromUrl: string = "";
@@ -92,20 +92,6 @@ export class ShowEpisodesComponents implements OnInit {
 
   ) { }
 
-  public getAllContents(): void {
-    this.contentService.getAllContents().subscribe({
-      next: (data) => {
-        this.contents = data;
-        console.log("success");
-        this.getAllMetadatas();
-      },
-      error: (err) => {
-        console.error("API Hatası:", err);
-
-      }
-    });
-
-  }
 
   public getAllMetadatas(): void {
     this.metadataService.getAllMetadatas().subscribe(
@@ -141,7 +127,7 @@ export class ShowEpisodesComponents implements OnInit {
       this.idFromUrl = idFromUrln;
     }
 
-    this.getAllContents();
+    this.getAllMetadatas();
     this.setupDirectorSearch();
     this.setupCastSearch();
 
@@ -276,7 +262,6 @@ export class ShowEpisodesComponents implements OnInit {
       year: episode.year,
       language: episode.language,
       country: episode.country,
-      director: episode.director
     });
 
 
@@ -288,6 +273,10 @@ export class ShowEpisodesComponents implements OnInit {
         );
       });
     }
+
+    let directorName:string=`${episode.director}`;
+    
+    this.directorSearchCtrl.setValue(directorName);
 
     this.isModalOpen = true;
   }
@@ -423,7 +412,8 @@ export class ShowEpisodesComponents implements OnInit {
           this.metadataService.getMetadataInformations(episode.imdbID).subscribe({
             next: (episodeData) => {
               let seasonId: number = Number(episodeData.Season);
-              let allEpisode: DtoAllEpisode = new DtoAllEpisode(episode.imdbID, episodeData.Actors, episodeData.Director, new Date, episodeData.Title, episodeData.Plot, episodeData.Poster, episodeData.Year, episodeData.Language, episodeData.Country, this.idFromUrl);
+              let episodeNumber:number=episodeData.Episode;
+              let allEpisode: DtoAllEpisode = new DtoAllEpisode(episode.imdbID, episodeData.Actors, episodeData.Director, new Date, episodeData.Title, episodeData.Plot, episodeData.Poster, episodeData.Year, episodeData.Language, episodeData.Country, this.idFromUrl,episodeNumber);
               episodeList.push(allEpisode);
               j++;
               if (totalepisode == j) {
@@ -431,7 +421,7 @@ export class ShowEpisodesComponents implements OnInit {
                   next: (data) => {
                     this.isFetching=false;
                     alert('Fetching is completed.');
-                    this.getAllContents();
+                    this.getAllMetadatas();
                     this.cdr.detectChanges();
                     this.cdr.markForCheck();
                   }
@@ -464,7 +454,7 @@ export class ShowEpisodesComponents implements OnInit {
         return;
       }
 
-       this.movieCastService.getFilteredCasts(searchStr).subscribe({
+       this.movieCastService.getFilteredDirectors(searchStr).subscribe({
           next:(data)=>{
             this.filteredDirectors=data;
             this.cdr.detectChanges();
