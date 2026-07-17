@@ -15,6 +15,7 @@ import { Metadata } from '../../../Models/Metadata';
 import { MetadataService } from '../../../Services/metadata.service';
 import { MovieCastService } from '../../../Services/movie-cast.service';
 import { DtoMovieCastUpdate } from '../../../Models/DtoMovieCastUpdate';
+import { AlertService } from '../../../Services/alert';
 
 
 @Component({
@@ -54,6 +55,7 @@ export class CastPopUp {
     private metadataService: MetadataService,
     private movieCastService: MovieCastService,
     private cdr: ChangeDetectorRef,
+    private alertService:AlertService,
   ) { }
 
 
@@ -235,7 +237,7 @@ export class CastPopUp {
 
         this.movieCastService.updateCast(movieCastUpdate).subscribe({
           next: (data) => {
-            console.log("success");
+            this.alertService.show("Update",'Update successfully completed',"success");
 
           },
           error: (err) => {
@@ -248,7 +250,7 @@ export class CastPopUp {
         //Save Cast
         this.movieCastService.addCastComplete(movieCastUpdate).subscribe({
           next: (data) => {
-            console.log("success");
+            this.alertService.show("Save",'Save successfully completed',"success");
             id = data.id;
 
           },

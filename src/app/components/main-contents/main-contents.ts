@@ -6,6 +6,7 @@ import { MovieCastService } from '../../Services/movie-cast.service';
 import { Metadata } from '../../Models/Metadata';
 import { RouterLink } from '@angular/router';
 import { DtoAddContent } from '../../Models/DtoAddContent';
+import { AlertService } from '../../Services/alert';
 
 type ContentType = 'movies' | 'series';
 
@@ -42,6 +43,7 @@ export class MainContents implements OnInit {
     private metadataService: MetadataService,
     private moviecastService: MovieCastService,
     private cdr: ChangeDetectorRef,
+    private alertService:AlertService
   ) {
   }
 
@@ -73,6 +75,7 @@ export class MainContents implements OnInit {
     this.contentService.deleteCompleteContent(id).subscribe({
       next: (data) => {
         this.loadData();
+        this.alertService.show("Delete",'Delete successfully completed.',"success");
         this.cdr.markForCheck();
         this.cdr.detectChanges();
       }

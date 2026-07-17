@@ -1,28 +1,20 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, ViewChild,OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatDialog } from '@angular/material/dialog';
 import { HttpClient } from '@angular/common/http';
 import { MovieCast } from '../../Models/MovieCast';
 import { CastPopUp } from './cast-pop-up/cast-pop-up';
 import { MovieCastService } from '../../Services/movie-cast.service';
-import { DtoMovieCast } from '../../Models/DtoMovieCast';
+import { Subject, Subscription } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { DtoMovieCastUpdate } from '../../Models/DtoMovieCastUpdate';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialogModule } from '@angular/material/dialog';
-import {
-  MatHeaderCellDef,
-  MatCellDef,
-  MatHeaderRowDef,
-  MatRowDef,
-  MatColumnDef
-} from '@angular/material/table';
-import { MatTableModule, MatTableDataSource } from '@angular/material/table';
-import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { MatTableModule, } from '@angular/material/table';
+import { MatPaginatorModule } from '@angular/material/paginator';
 import { ContentService } from '../../Services/content.service';
-import { Content } from '../../Models/Content';
 import { MetadataService } from '../../Services/metadata.service';
-import { Metadata } from '../../Models/Metadata';
 
 @Component({
   selector: 'app-all-casts',
@@ -38,7 +30,7 @@ import { Metadata } from '../../Models/Metadata';
   styleUrl: './all-casts.css',
   changeDetection: ChangeDetectionStrategy.Eager
 })
-export class AllCasts implements OnInit {
+export class AllCasts implements OnInit, OnDestroy {
 
   casts: MovieCast[] = [];
   displayedColumns: string[] = ['name', 'poster', 'castType', 'contentList', 'edit', 'delete'];
@@ -52,6 +44,11 @@ export class AllCasts implements OnInit {
   pageNumbers: number[] = [];
   protected Math = Math;
 
+  // Arama için yeni değişkenlerimiz
+  searchQuery: string = '';
+  private searchSubject = new Subject<string>();
+  private searchSubscription!: Subscription;
+
 
   constructor(private dialog: MatDialog, private http: HttpClient,
     private movieCastService: MovieCastService,
@@ -61,7 +58,35 @@ export class AllCasts implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    // 1. Debounce mekanizmasını kuruyoruz
+    this.searchSubscription = this.searchSubject.pipe(
+      debounceTime(300), // Kullanıcı yazmayı bıraktıktan sonra 300ms bekle
+      distinctUntilChanged() // Sadece değer gerçekten değiştiyse tetikle (örn: boşluk basıp silerse tetikleme)
+    ).subscribe(query => {
+      this.searchQuery = query;
+      this.currentPage = 1; // Yeni aramada sayfayı mutlaka 1'e çekiyoruz
+      this.loadCasts();
+    });
     this.loadCasts();
+  }
+
+  // Kullanıcı her yazı yazdığında tetiklenir
+  onSearchInput(event: Event) {
+    const inputElement = event.target as HTMLInputElement;
+    this.searchSubject.next(inputElement.value);
+  }
+
+  // Arama temizleme butonu fonksiyonu
+  clearSearch() {
+    this.searchQuery = '';
+    this.currentPage = 1;
+    this.searchSubject.next('');
+  }
+
+  ngOnDestroy() {
+    if (this.searchSubscription) {
+      this.searchSubscription.unsubscribe();
+    }
   }
 
 
@@ -79,8 +104,13 @@ export class AllCasts implements OnInit {
   }
 
   loadCasts(): void {
-    const pageParam = this.currentPage - 1; 
-    this.movieCastService.getPageCast(pageParam, this.pageSize)
+    const pageParam = this.currentPage - 1;
+    let query:string="";
+    if(this.searchQuery=="")
+      query=".null";
+    else
+      query=this.searchQuery;
+    this.movieCastService.getPageCast(pageParam, this.pageSize, query)
       .subscribe({
         next: (response: any) => {
           this.casts = response.content; 
@@ -122,7 +152,8 @@ export class AllCasts implements OnInit {
 
     dialogRef.afterClosed().subscribe((result: DtoMovieCastUpdate) => {
       this.loadCasts();
-
+      this.cdr.detectChanges();
+      this.cdr.markForCheck();
     });
   }
 
@@ -135,6 +166,8 @@ export class AllCasts implements OnInit {
 
     dialogRef.afterClosed().subscribe(() => {
       this.loadCasts();
+      this.cdr.detectChanges();
+      this.cdr.markForCheck();
 
     });
   }

@@ -38,8 +38,8 @@ export class MovieCastService {
         return this.http.delete<MovieCast>(`${this.apiUrl}/delete-cast/${id}`);
     }
 
-    public getPageCast(page: number, size: number): Observable<DtoMovieCast> {
-        return this.http.get<DtoMovieCast>(`${this.apiUrl}/get-cast-page?page=${page}&size=${size}`);
+    public getPageCast(page: number, size: number,query:string): Observable<DtoMovieCast> {
+        return this.http.get<DtoMovieCast>(`${this.apiUrl}/get-cast-page?page=${page}&size=${size}&query=${query}`);
     }
 
     public updateCastByContentId(id: string): Observable<boolean> {

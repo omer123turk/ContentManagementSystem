@@ -1,0 +1,20 @@
+@if (alert$ | async; as alert) {
+  <div class="alert-backdrop" (click)="close()">
+    <div class="alert-box" [class]="alert.type" (click)="$event.stopPropagation()">
+      
+      <div class="alert-icon">
+        @if (alert.type === 'success') { ✓ }
+        @else if (alert.type === 'error') { ✕ }
+        @else if (alert.type === 'warning') { ⚠ }
+        @else { ℹ }
+      </div>
+
+      <div class="alert-content">
+        <h3 class="alert-title">{{ alert.title }}</h3>
+        <p class="alert-message">{{ alert.message }}</p>
+      </div>
+
+      <button class="alert-close-btn" (click)="close()">Ok</button>
+    </div>
+  </div>
+}

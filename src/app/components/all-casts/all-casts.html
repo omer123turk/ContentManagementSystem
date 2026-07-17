@@ -4,6 +4,22 @@
     <button class="btn-add" (click)="openAddDialog()">+ Add New Cast</button>
   </div>
 
+  <div class="search-container">
+    <div class="search-wrapper">
+      <span class="search-icon">🔍</span>
+      <input 
+        type="text" 
+        [value]="searchQuery"
+        (input)="onSearchInput($event)"
+        placeholder="Search casts by name..." 
+        class="search-input"
+      />
+      @if (searchQuery) {
+        <button class="clear-btn" (click)="clearSearch()">✕</button>
+      }
+    </div>
+  </div>
+
   <div class="table-container">
     <table class="management-table">
       <thead>
@@ -54,9 +70,10 @@
     </table>
   </div>
 
+  <!-- Sayfalama (Pagination) Alanı -->
   <div class="pagination-container">
     <div class="pagination-info">
-      Showing <strong>{{ (currentPage - 1) * pageSize + 1 }}</strong> -
+      Showing <strong>{{ totalElements > 0 ? (currentPage - 1) * pageSize + 1 : 0 }}</strong> -
       <strong>{{ Math.min(currentPage * pageSize, totalElements) }}</strong> of
       <strong>{{ totalElements }}</strong> casts
     </div>

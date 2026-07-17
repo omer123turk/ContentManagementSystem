@@ -18,6 +18,7 @@ import { DtoAllEpisode } from '../../Models/DtoAllEpisode';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs';
 import { DtoAddContent } from '../../Models/DtoAddContent';
 import { DtoEpisodeWithActors } from '../../Models/DtoEpisodeWithActors';
+import { AlertService } from '../../Services/alert';
 
 interface Episode {
   id: string;
@@ -88,7 +89,8 @@ export class ShowEpisodesComponents implements OnInit {
     private movieCastService: MovieCastService,
     private fb: FormBuilder,
     private route: ActivatedRoute,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private alertService:AlertService
 
   ) { }
 
@@ -315,7 +317,7 @@ export class ShowEpisodesComponents implements OnInit {
           let completeContent: DtoAddContent = new DtoAddContent(this.currentEpisodeId, casts, directorName, new Date, 3, [], [], episode.number, episodeData.title, episodeData.plot, episodeData.poster, episodeData.year, episodeData.language, episodeData.country);
           this.contentService.updateContentWithActors(completeContent).subscribe({
             next: (data) => {
-              alert('Update successfully completed.');
+              this.alertService.show("Update",'Update successfully completed.',"success");
               this.closeModal();
               this.loadEpisodes();
             }
@@ -328,7 +330,7 @@ export class ShowEpisodesComponents implements OnInit {
           let dtoEpisode: DtoEpisodeWithActors = new DtoEpisodeWithActors(contentId, casts, directorName, new Date, episodeData.title, episodeData.plot, episodeData.poster, episodeData.year, episodeData.language, episodeData.country, this.idFromUrl);
           this.contentService.addEpisodeWithActorsToSeason(dtoEpisode).subscribe({
             next: (data) => {
-              alert('Adding successfully completed.');
+              this.alertService.show("Add",'Adding successfully completed.',"success");
             }
           });
 
@@ -420,7 +422,7 @@ export class ShowEpisodesComponents implements OnInit {
                 this.contentService.addAllEpisodes(episodeList).subscribe({
                   next: (data) => {
                     this.isFetching=false;
-                    alert('Fetching is completed.');
+                    this.alertService.show("Fetching",'Fetching is completed.',"success");
                     this.getAllMetadatas();
                     this.cdr.detectChanges();
                     this.cdr.markForCheck();

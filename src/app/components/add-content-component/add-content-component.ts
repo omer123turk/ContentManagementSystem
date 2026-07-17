@@ -8,6 +8,7 @@ import { MetadataService } from '../../Services/metadata.service';
 import { DtoMovieCast } from '../../Models/DtoMovieCast';
 import { debounceTime, distinctUntilChanged, switchMap, of } from 'rxjs';
 import { DtoAddContent } from '../../Models/DtoAddContent';
+import { AlertService } from '../../Services/alert';
 
 @Component({
   selector: 'app-add-content-component',
@@ -39,7 +40,8 @@ export class AddContentComponent implements OnInit {
     private contentService: ContentService,
     private movieCastService: MovieCastService,
     private metadataService: MetadataService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private alertService:AlertService
   ) { }
 
   ngOnInit(): void {
@@ -96,24 +98,20 @@ export class AddContentComponent implements OnInit {
     });
   }
 
-  //Seçilebilir castleri bul
   getAvailableCasts(): MovieCast[] {
     return this.castList.filter(cast => !this.selectedCastsList.some(s => s.id === cast.id));
   }
 
-  //Casti sil 
   removeCastMember(castId: number): void {
     this.selectedCastsList = this.selectedCastsList.filter(c => c.id !== castId);
 
     this.updateFormCasts();
   }
 
-  //cast formunu güncelle
   private updateFormCasts(): void {
     const ids = this.selectedCastsList.map(c => c.id);
     this.mediaForm.get('casts')?.setValue(ids);
   }
-
 
   setupDirectorSearch() {
     this.directorSearchCtrl.valueChanges.pipe(
@@ -145,7 +143,6 @@ export class AddContentComponent implements OnInit {
     this.mediaForm.get('director')?.setValue(director.id);
     this.showDirectorDropdown = false;
   }
-
 
   setupCastSearch() {
     this.castSearchCtrl.valueChanges.pipe(
@@ -200,7 +197,6 @@ export class AddContentComponent implements OnInit {
       this.filteredCasts = [];
     }
   }
-  
 
   onSubmit(): void {
     if (this.mediaForm.valid) {
@@ -232,7 +228,7 @@ export class AddContentComponent implements OnInit {
           this.mediaForm.reset();
           this.directorSearchCtrl.setValue("");
           this.selectedCastsList=[];
-          alert('Content added successfully');
+          this.alertService.show("Information",'Content added successfully',"success");
         }
       });
     } else {
@@ -302,9 +298,9 @@ export class AddContentComponent implements OnInit {
             this.selectedCastsList = [...data.casts];
           }
 
-          alert('İçerik bilgileri başarıyla getirildi ve form dolduruldu!');
+          this.alertService.show("Success",'Content information was successfully retrieved and the form was filled out!',"success");
         } else {
-          alert('Bu ID ile eşleşen bir içerik bulunamadı.');
+          this.alertService.show("Error",'No content matching this ID was found.',"error");
         }
       },
       error: (err) => {

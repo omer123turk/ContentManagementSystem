@@ -7,6 +7,7 @@ import { ContentService } from '../../Services/content.service';
 import { DtoContentComplete } from '../../Models/DtoContentComplete';
 import { debounceTime, distinctUntilChanged, switchMap, of } from 'rxjs';
 import { DtoAddContent } from '../../Models/DtoAddContent';
+import { AlertService } from '../../Services/alert';
 
 
 @Component({
@@ -42,7 +43,8 @@ export class EditComponent implements OnInit {
     private movieCastService: MovieCastService,
     private route: ActivatedRoute,
     private contentService: ContentService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private alertService:AlertService
   ) { }
 
   ngOnInit(): void {
@@ -197,7 +199,7 @@ export class EditComponent implements OnInit {
         let CompleteContent: DtoAddContent = new DtoAddContent(this.idFromUrl, movieCastNameList, directorName, this.editForm.value.created_at, this.editForm.value.selectedContentType, data.seasonList, data.episodeList, data.number, this.editForm.value.title, this.editForm.value.plot, this.editForm.value.poster, this.editForm.value.year, this.editForm.value.language, this.editForm.value.country);
         this.contentService.updateContentWithActors(CompleteContent).subscribe({
           next: (data) => {
-            alert('Update successfully completed.');
+            this.alertService.show("Update",'Update successfully completed.',"success");
           }
         });
       }

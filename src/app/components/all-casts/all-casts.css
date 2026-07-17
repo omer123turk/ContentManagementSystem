@@ -205,3 +205,75 @@
     border-color: #e9ecef;
     color: #6c757d;
 }
+/* Arama Alanı Konteyneri */
+.search-container {
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: flex-start;
+}
+
+/* Arama Kutusu Çerçevesi */
+.search-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: 450px; /* Çok genişlememesi için sınır koyuyoruz */
+}
+
+/* Büyüteç İkonu */
+.search-icon {
+  position: absolute;
+  left: 16px;
+  color: #9ca3af;
+  font-size: 16px;
+  pointer-events: none; /* Üzerine tıklanamasın, input odaklansın */
+}
+
+/* Şık Textbox Tasarımı */
+.search-input {
+  width: 100%;
+  padding: 12px 40px 12px 44px; /* Sol tarafta ikon, sağda temizle butonu için boşluk */
+  font-size: 14px;
+  color: #1f2937;
+  background-color: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px; /* Köşeleri yuvarlak ve modern yaptık */
+  transition: all 0.2s ease-in-out;
+  outline: none;
+}
+
+/* Textbox Odaklandığında (Focus) */
+.search-input:focus {
+  background-color: #ffffff;
+  border-color: #3b82f6; /* Odaklanınca mavi kenarlık */
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15); /* Yumuşak bir parlama efekti */
+}
+
+/* Placeholder Yazısı */
+.search-input::placeholder {
+  color: #9ca3af;
+  font-weight: 400;
+}
+
+/* Sağdaki Temizle (✕) Butonu */
+.clear-btn {
+  position: absolute;
+  right: 14px;
+  background: none;
+  border: none;
+  color: #9ca3af;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.15s, color 0.15s;
+}
+
+.clear-btn:hover {
+  background-color: #f3f4f6;
+  color: #4b5563;
+}
