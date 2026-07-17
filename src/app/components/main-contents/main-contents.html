@@ -9,6 +9,21 @@
         </button>
     </div>
 
+    <!-- Yeni Şık Arama Kutusu (Her iki sekme için ortak) -->
+    <div class="search-container" style="margin-bottom: 20px; max-width: 450px; position: relative; display: flex; align-items: center;">
+        <span class="search-icon" style="position: absolute; left: 16px; color: #9ca3af; pointer-events: none;">🔍</span>
+        <input 
+            type="text" 
+            [value]="searchQuery"
+            (input)="onSearchInput($event)"
+            placeholder="Search by title..." 
+            style="width: 100%; padding: 12px 40px 12px 44px; font-size: 14px; border: 1px solid #e5e7eb; border-radius: 12px; outline: none; background-color: #f9fafb;"
+        />
+        @if (searchQuery) {
+            <button (click)="clearSearch()" style="position: absolute; right: 14px; background: none; border: none; color: #9ca3af; cursor: pointer; font-size: 14px;">✕</button>
+        }
+    </div>
+
     <div class="content-area">
 
         @if (activeContentType === 'movies') {
@@ -39,7 +54,6 @@
                         @for (content of movieContents; track content.id) {
                         <tr>
                             <td class="td-poster">
-    
                                 <img [src]="content.poster || 'https://via.placeholder.com/40x60'" alt="Poster">
                             </td>
                             <td class="td-title"><strong>{{ content.title }}</strong></td>
@@ -76,7 +90,7 @@
             </div>
             <div class="pagination-container">
                 <div class="pagination-info">
-                    Showing <strong>{{ (currentPage - 1) * pageSize + 1 }}</strong> -
+                    Showing <strong>{{ totalElements > 0 ? (currentPage - 1) * pageSize + 1 : 0 }}</strong> -
                     <strong>{{ Math.min(currentPage * pageSize, totalElements) }}</strong> of
                     <strong>{{ totalElements }}</strong> items
                 </div>
@@ -170,7 +184,7 @@
             </div>
             <div class="pagination-container">
                 <div class="pagination-info">
-                    Showing <strong>{{ (currentPage - 1) * pageSize + 1 }}</strong> -
+                    Showing <strong>{{ totalElements > 0 ? (currentPage - 1) * pageSize + 1 : 0 }}</strong> -
                     <strong>{{ Math.min(currentPage * pageSize, totalElements) }}</strong> of
                     <strong>{{ totalElements }}</strong> items
                 </div>

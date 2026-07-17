@@ -4,12 +4,26 @@
         <button class="btn-add" (click)="openAddModal()">+ Add Episode</button>
         <button class="btn-fetch" [disabled]="isFetching" (click)="fetchSeasonDataFromBackend()">
             @if (isFetching) {
-                <span class="btn-spinner"></span>
-                Fetching...
+            <span class="btn-spinner"></span>
+            Fetching...
             } @else {
-                <i class="bi bi-cloud-download"></i> Fetch Season Data
+            <i class="bi bi-cloud-download"></i> Fetch Season Data
             }
         </button>
+    </div>
+
+    <!-- Yeni Şık Arama Kutusu -->
+    <div class="search-container"
+        style="margin-bottom: 20px; max-width: 450px; position: relative; display: flex; align-items: center;">
+        <span class="search-icon"
+            style="position: absolute; left: 16px; color: #9ca3af; pointer-events: none;">🔍</span>
+        <input type="text" [value]="searchQuery" (input)="onSearchInput($event)"
+            placeholder="Search episodes by title..."
+            style="width: 100%; padding: 12px 40px 12px 44px; font-size: 14px; border: 1px solid #e5e7eb; border-radius: 12px; outline: none; background-color: #f9fafb;" />
+        @if (searchQuery) {
+        <button (click)="clearSearch()"
+            style="position: absolute; right: 14px; background: none; border: none; color: #9ca3af; cursor: pointer; font-size: 14px;">✕</button>
+        }
     </div>
 
     @if (isLoading) {
@@ -61,7 +75,8 @@
                 </tr>
                 } @empty {
                 <tr>
-                    <td colspan="9" class="empty-table-message">No episodes found. Click 'Add Episode' to create one.</td>
+                    <td colspan="9" class="empty-table-message">No episodes found. Click 'Add Episode' to create one.
+                    </td>
                 </tr>
                 }
             </tbody>
@@ -70,20 +85,20 @@
 
     <div class="pagination-container">
         <div class="pagination-info">
-            Showing <strong>{{ (currentPage - 1) * pageSize + 1 }}</strong> - 
-            <strong>{{ Math.min(currentPage * pageSize, totalElements) }}</strong> of 
+            Showing <strong>{{ (currentPage - 1) * pageSize + 1 }}</strong> -
+            <strong>{{ Math.min(currentPage * pageSize, totalElements) }}</strong> of
             <strong>{{ totalElements }}</strong> episodes
         </div>
-        
+
         <div class="pagination-controls">
             <button class="btn-page" [disabled]="currentPage === 1" (click)="onPageChange(currentPage - 1)">
                 Previous
             </button>
 
             @for (page of pageNumbers; track page) {
-                <button class="btn-page" [class.active]="currentPage === page" (click)="onPageChange(page)">
-                    {{ page }}
-                </button>
+            <button class="btn-page" [class.active]="currentPage === page" (click)="onPageChange(page)">
+                {{ page }}
+            </button>
             }
 
             <button class="btn-page" [disabled]="currentPage === totalPages" (click)="onPageChange(currentPage + 1)">
@@ -134,24 +149,18 @@
                     <label>Country</label>
                     <input type="text" formControlName="country" placeholder="USA">
                 </div>
-                
+
                 <div class="form-group autocomplete-wrapper">
                     <label>Director</label>
-                    <input 
-                        type="text" 
-                        [formControl]="directorSearchCtrl" 
-                        placeholder="Type a director name..."
-                        class="cast-select"
-                        style="width: 100%; height: 38px;"
-                        (focus)="showDirectorDropdown = true"
-                    >
+                    <input type="text" [formControl]="directorSearchCtrl" placeholder="Type a director name..."
+                        class="cast-select" style="width: 100%; height: 38px;" (focus)="showDirectorDropdown = true">
                     @if (showDirectorDropdown && directorSearchCtrl.value) {
-                        <ul class="autocomplete-dropdown">
-                            @for (cast of filteredDirectors; track cast.id) {
-                                <li (click)="selectDirector(cast)">{{ cast.name }}</li>
-                            }
-                            
-                        </ul>
+                    <ul class="autocomplete-dropdown">
+                        @for (cast of filteredDirectors; track cast.id) {
+                        <li (click)="selectDirector(cast)">{{ cast.name }}</li>
+                        }
+
+                    </ul>
                     }
                 </div>
             </div>
@@ -160,23 +169,17 @@
                 <label>Cast Management</label>
 
                 <div class="cast-input-group autocomplete-wrapper">
-                    <input 
-                        type="text" 
-                        [formControl]="castSearchCtrl" 
-                        placeholder="Type a cast member name..."
-                        class="cast-select"
-                        style="flex: 1;"
-                        (focus)="showCastDropdown = true"
-                    >
+                    <input type="text" [formControl]="castSearchCtrl" placeholder="Type a cast member name..."
+                        class="cast-select" style="flex: 1;" (focus)="showCastDropdown = true">
                     <button type="button" class="btn-add-cast" (click)="addCastToForm()">+ Add Cast</button>
 
                     @if (showCastDropdown && castSearchCtrl.value) {
-                        <ul class="autocomplete-dropdown" style="top: 100%;">
-                            @for (cast of filteredCasts; track cast.id) {
-                                <li (click)="selectCastFromDropdown(cast)">{{ cast.name }}</li>
-                            }
-                
-                        </ul>
+                    <ul class="autocomplete-dropdown" style="top: 100%;">
+                        @for (cast of filteredCasts; track cast.id) {
+                        <li (click)="selectCastFromDropdown(cast)">{{ cast.name }}</li>
+                        }
+
+                    </ul>
                     }
                 </div>
 
@@ -184,7 +187,8 @@
                     @for (castControl of castsFormArray.controls; track $index) {
                     <div class="cast-tag">
                         <span class="cast-tag-text">{{ castControl.value }}</span>
-                        <button type="button" class="btn-remove-cast" (click)="removeCastFromForm($index)">&times;</button>
+                        <button type="button" class="btn-remove-cast"
+                            (click)="removeCastFromForm($index)">&times;</button>
                     </div>
                     } @empty {
                     <p class="no-cast-msg">No casts added yet.</p>

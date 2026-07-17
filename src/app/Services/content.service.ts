@@ -70,12 +70,12 @@ export class ContentService {
         return this.http.put<boolean>(`${this.apiUrl}/update-complete-content`, content);
     }
 
-     public getPageContentByType(contentType: number,page:number,size:number): Observable<any> {
-        return this.http.get<any>(`${this.apiUrl}/get-page-content?type=${contentType}&page=${page}&size=${size}`);
+     public getPageContentByType(contentType: number,page:number,size:number,query:string): Observable<any> {
+        return this.http.get<any>(`${this.apiUrl}/get-page-content?type=${contentType}&page=${page}&size=${size}&query=${query}`);
     }
 
-     public getPageEpisodeContentBySeason(seasonId: string,page:number,size:number): Observable<DtoContentComplete> {
-        return this.http.get<DtoContentComplete>(`${this.apiUrl}/get-episode-content-page?seasonId=${seasonId}&page=${page}&size=${size}`);
+     public getPageEpisodeContentBySeason(seasonId: string,page:number,size:number,query:string): Observable<DtoContent[]> {
+        return this.http.get<DtoContent[]>(`${this.apiUrl}/get-episode-content-page?seasonId=${seasonId}&page=${page}&size=${size}&query=${query}`);
     }
 
      public addAllEpisodes(episodeList: DtoAllEpisode[]): Observable<boolean> {

@@ -7,6 +7,7 @@ import { Metadata } from '../../Models/Metadata';
 import { RouterLink } from '@angular/router';
 import { DtoAddContent } from '../../Models/DtoAddContent';
 import { AlertService } from '../../Services/alert';
+import { debounceTime, distinctUntilChanged, Subject, Subscription } from 'rxjs';
 
 type ContentType = 'movies' | 'series';
 
@@ -37,6 +38,11 @@ export class MainContents implements OnInit {
 
   protected Math = Math;
 
+  // Yeni arama değişkenleri
+  searchQuery: string = '';
+  private searchSubject = new Subject<string>();
+  private searchSubscription!: Subscription;
+
 
   //contructor
   constructor(private contentService: ContentService,
@@ -48,7 +54,33 @@ export class MainContents implements OnInit {
   }
 
   ngOnInit(): void {
+    this.searchQuery="";
     this.loadData();
+    this.setupContentSearch();
+  }
+
+  setupContentSearch(){
+    this.searchSubscription = this.searchSubject.pipe(
+      debounceTime(300),
+      distinctUntilChanged()
+    ).subscribe(query => {
+      this.searchQuery = query;
+      this.currentPage = 1; // Her aramada 1. sayfaya dönüyoruz
+          this.loadData();
+    });
+  }
+
+  // Kullanıcı yazı yazdıkça tetiklenir
+  onSearchInput(event: Event) {
+    const inputElement = event.target as HTMLInputElement;
+    this.searchSubject.next(inputElement.value);
+  }
+
+  // Arama temizleme (✕) butonu
+  clearSearch() {
+    this.searchQuery = '';
+    this.currentPage = 1;
+    this.searchSubject.next('');
   }
 
 
@@ -86,6 +118,7 @@ export class MainContents implements OnInit {
   setContentType(type: ContentType): void {
     this.activeContentType = type;
     this.currentPage = 1;
+    this.searchQuery = '';
     this.loadData();
   }
 
@@ -98,7 +131,13 @@ export class MainContents implements OnInit {
     if (this.activeContentType == 'series')
       contentType = 1;
 
-    this.contentService.getPageContentByType(contentType, pageParam, this.pageSize)
+    let query:string="";
+    if(this.searchQuery=="")
+      query=".null";
+    else
+      query=this.searchQuery;
+
+    this.contentService.getPageContentByType(contentType, pageParam, this.pageSize,query)
       .subscribe({
         next: (response: any) => {
 

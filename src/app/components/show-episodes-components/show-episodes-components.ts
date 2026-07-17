@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators, FormControl } from '@angular/forms';
 import { Content } from '../../Models/Content';
@@ -9,13 +9,9 @@ import { Metadata } from '../../Models/Metadata';
 import { MovieCast } from '../../Models/MovieCast';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
-import { DtoContent } from '../../Models/DtoContent';
-import { DtoMetadata } from '../../Models/DtoMetadata';
-import { DtoMetadataUpdate } from '../../Models/DtoMetadataUpdate';
-import { DtoEpisode } from '../../Models/DtoEpisode';
-import { DtoContentComplete } from '../../Models/DtoContentComplete';
+import { BehaviorSubject, Subscription } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { DtoAllEpisode } from '../../Models/DtoAllEpisode';
-import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs';
 import { DtoAddContent } from '../../Models/DtoAddContent';
 import { DtoEpisodeWithActors } from '../../Models/DtoEpisodeWithActors';
 import { AlertService } from '../../Services/alert';
@@ -39,7 +35,7 @@ interface Episode {
   styleUrl: './show-episodes-components.css',
   changeDetection: ChangeDetectionStrategy.Eager
 })
-export class ShowEpisodesComponents implements OnInit {
+export class ShowEpisodesComponents implements OnInit,OnDestroy {
 
   isLoading: boolean = false;
   episodeContents: Content[] = [];
@@ -83,6 +79,11 @@ export class ShowEpisodesComponents implements OnInit {
 
   protected Math = Math;
 
+  // Arama için yeni eklenen alanlar
+  searchQuery: string = '';
+  private searchSubject = new BehaviorSubject<string>('');
+  private searchSubscription!: Subscription;
+
   constructor(
     private contentService: ContentService,
     private metadataService: MetadataService,
@@ -93,6 +94,36 @@ export class ShowEpisodesComponents implements OnInit {
     private alertService:AlertService
 
   ) { }
+
+
+  setupEpisodeSearch(){
+    // Debounce mekanizmasını kuruyoruz (Yazma bittikten 300ms sonra tetiklenir)
+    this.searchSubscription = this.searchSubject.pipe(
+      debounceTime(300),
+      distinctUntilChanged()
+    ).subscribe(query => {
+      this.searchQuery = query;
+      this.currentPage = 1; // Yeni aramada ilk sayfaya dön
+      this.loadEpisodes();
+    });
+  }
+
+  onSearchInput(event: Event) {
+    const inputElement = event.target as HTMLInputElement;
+    this.searchSubject.next(inputElement.value);
+  }
+
+  clearSearch() {
+    this.searchQuery = '';
+    this.currentPage = 1;
+    this.searchSubject.next('');
+  }
+
+  ngOnDestroy() {
+    if (this.searchSubscription) {
+      this.searchSubscription.unsubscribe();
+    }
+  }
 
 
   public getAllMetadatas(): void {
@@ -132,7 +163,7 @@ export class ShowEpisodesComponents implements OnInit {
     this.getAllMetadatas();
     this.setupDirectorSearch();
     this.setupCastSearch();
-
+    this.setupEpisodeSearch();
   }
 
   initForm() {
@@ -154,7 +185,13 @@ export class ShowEpisodesComponents implements OnInit {
 
     const pageParam = this.currentPage - 1;
 
-    this.contentService.getPageEpisodeContentBySeason(this.idFromUrl, pageParam, this.pageSize)
+    let query:string="";
+    if(this.searchQuery=="")
+      query=".null";
+    else
+      query=this.searchQuery;
+
+    this.contentService.getPageEpisodeContentBySeason(this.idFromUrl, pageParam, this.pageSize,query)
       .subscribe({
         next: (response: any) => {
           this.episodeContents = [];
