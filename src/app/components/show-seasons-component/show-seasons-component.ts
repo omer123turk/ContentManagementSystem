@@ -54,8 +54,6 @@ export class ShowSeasonsComponent implements OnInit {
    this.getSeasons();
   }
 
- 
-
   getSeasons() {
     const idFromUrl = this.route.snapshot.paramMap.get('id');
     if (idFromUrl != null)
@@ -105,7 +103,5 @@ export class ShowSeasonsComponent implements OnInit {
     })
 
   }
-
-
 
 }

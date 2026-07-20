@@ -61,7 +61,6 @@ export class EditComponent implements OnInit {
 
   }
 
-
   private initForms(): void {
 
     this.editForm = this.fb.group({
@@ -81,11 +80,9 @@ export class EditComponent implements OnInit {
     });
   }
 
-
   get cardArray(): FormArray {
     return this.cardForm.get('cards') as FormArray;
   }
-
 
   private loadInitialData(): void {
     this.isLoading = true;
@@ -159,12 +156,9 @@ export class EditComponent implements OnInit {
 
   }
 
-
-
   removeCast(index: number): void {
     this.cardArray.removeAt(index);
   }
-
 
   update(): void {
     if (this.editForm.invalid) {
@@ -207,7 +201,6 @@ export class EditComponent implements OnInit {
 
 
   }
-
 
   setupDirectorSearch() {
     this.directorSearchCtrl.valueChanges.pipe(

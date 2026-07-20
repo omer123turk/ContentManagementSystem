@@ -38,7 +38,6 @@ export class MainContents implements OnInit {
 
   protected Math = Math;
 
-  // Yeni arama değişkenleri
   searchQuery: string = '';
   private searchSubject = new Subject<string>();
   private searchSubscription!: Subscription;
@@ -65,24 +64,21 @@ export class MainContents implements OnInit {
       distinctUntilChanged()
     ).subscribe(query => {
       this.searchQuery = query;
-      this.currentPage = 1; // Her aramada 1. sayfaya dönüyoruz
+      this.currentPage = 1; 
           this.loadData();
     });
   }
 
-  // Kullanıcı yazı yazdıkça tetiklenir
   onSearchInput(event: Event) {
     const inputElement = event.target as HTMLInputElement;
     this.searchSubject.next(inputElement.value);
   }
 
-  // Arama temizleme (✕) butonu
   clearSearch() {
     this.searchQuery = '';
     this.currentPage = 1;
     this.searchSubject.next('');
   }
-
 
   public getContentById(id: string): void {
     this.contentService.getContentById(id).subscribe({
@@ -100,7 +96,6 @@ export class MainContents implements OnInit {
       }
     });
   }
-
 
   onDelete(id: string) {
 
@@ -121,7 +116,6 @@ export class MainContents implements OnInit {
     this.searchQuery = '';
     this.loadData();
   }
-
 
   loadData(): void {
     this.isLoading = true;
@@ -165,8 +159,6 @@ export class MainContents implements OnInit {
       });
   }
 
-
-
   generatePageNumbers(): void {
     this.pageNumbers = [];
     for (let i = 1; i <= this.totalPages; i++) {
@@ -174,16 +166,11 @@ export class MainContents implements OnInit {
     }
   }
 
-
   onPageChange(page: number): void {
     if (page >= 1 && page <= this.totalPages) {
       this.currentPage = page;
       this.loadData();
     }
   }
-
-
-
-
 
 }

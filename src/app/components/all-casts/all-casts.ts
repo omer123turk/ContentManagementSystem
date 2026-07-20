@@ -44,7 +44,6 @@ export class AllCasts implements OnInit, OnDestroy {
   pageNumbers: number[] = [];
   protected Math = Math;
 
-  // Arama için yeni değişkenlerimiz
   searchQuery: string = '';
   private searchSubject = new Subject<string>();
   private searchSubscription!: Subscription;
@@ -70,13 +69,11 @@ export class AllCasts implements OnInit, OnDestroy {
     this.loadCasts();
   }
 
-  // Kullanıcı her yazı yazdığında tetiklenir
   onSearchInput(event: Event) {
     const inputElement = event.target as HTMLInputElement;
     this.searchSubject.next(inputElement.value);
   }
 
-  // Arama temizleme butonu fonksiyonu
   clearSearch() {
     this.searchQuery = '';
     this.currentPage = 1;
@@ -88,8 +85,6 @@ export class AllCasts implements OnInit, OnDestroy {
       this.searchSubscription.unsubscribe();
     }
   }
-
-
 
   getCastType(id: number): string {
     if (id == 0) {
@@ -134,15 +129,12 @@ export class AllCasts implements OnInit, OnDestroy {
       });
   }
 
-
   onPageChange(page: number): void {
   if (page >= 1 && page <= this.totalPages) {
     this.currentPage = page;
     this.loadCasts();
   }
-}
-
-
+  }
 
   openAddDialog(): void {
     const dialogRef = this.dialog.open(CastPopUp, {
@@ -157,7 +149,6 @@ export class AllCasts implements OnInit, OnDestroy {
     });
   }
 
-
   openEditDialog(cast: DtoMovieCastUpdate): void {
     const dialogRef = this.dialog.open(CastPopUp, {
       width: '400px',
@@ -171,7 +162,6 @@ export class AllCasts implements OnInit, OnDestroy {
 
     });
   }
-
 
   deleteCast(id: number | undefined): void {
     if (!id) return;

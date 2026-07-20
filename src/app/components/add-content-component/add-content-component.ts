@@ -41,7 +41,7 @@ export class AddContentComponent implements OnInit {
     private movieCastService: MovieCastService,
     private metadataService: MetadataService,
     private cdr: ChangeDetectorRef,
-    private alertService:AlertService
+    private alertService: AlertService
   ) { }
 
   ngOnInit(): void {
@@ -124,9 +124,9 @@ export class AddContentComponent implements OnInit {
         }
         // Backend servis araması (Kendi API'ne göre uyarla)
         this.movieCastService.getFilteredDirectors(value).subscribe({
-          next:(data)=>{
-            this.filteredDirectors=data;
-             this.cdr.detectChanges();
+          next: (data) => {
+            this.filteredDirectors = data;
+            this.cdr.detectChanges();
           }
         })
         return this.filteredDirectors;
@@ -155,9 +155,9 @@ export class AddContentComponent implements OnInit {
         }
 
         this.filteredCasts = [];
-         this.movieCastService.getFilteredCasts(value).subscribe({
-          next:(data)=>{
-            this.filteredCasts=data;
+        this.movieCastService.getFilteredCasts(value).subscribe({
+          next: (data) => {
+            this.filteredCasts = data;
             this.cdr.detectChanges();
           }
         })
@@ -190,7 +190,7 @@ export class AddContentComponent implements OnInit {
       this.currentlySelectedCast = null;
     }
     else {
-      let movieCast: MovieCast = { id: 0, name: writtenName, poster: "", contentIdList: [], directedContentIdList:[], castType: 0 };
+      let movieCast: MovieCast = { id: 0, name: writtenName, poster: "", contentIdList: [], directedContentIdList: [], castType: 0 };
       this.selectedCastsList.push(movieCast);
       this.castSearchCtrl.setValue('');
       this.currentlySelectedCast = null;
@@ -224,11 +224,19 @@ export class AddContentComponent implements OnInit {
       let Content: DtoAddContent = new DtoAddContent(this.mediaForm.value.id, movieCastNameList, directorName, new Date, contentType, [], [], number, this.mediaForm.value.title, this.mediaForm.value.plot, this.mediaForm.value.poster, this.mediaForm.value.year, this.mediaForm.value.language, this.mediaForm.value.country);
       this.contentService.addContentWithActors(Content).subscribe({
         next: (response) => {
-          console.log(response);
-          this.mediaForm.reset();
-          this.directorSearchCtrl.setValue("");
-          this.selectedCastsList=[];
-          this.alertService.show("Information",'Content added successfully',"success");
+          if (response != null) {
+            this.mediaForm.reset();
+            this.directorSearchCtrl.setValue("");
+            this.selectedCastsList = [];
+            this.alertService.show("Information", 'Content added successfully', "success");
+          }
+          else{
+            this.mediaForm.reset();
+            this.directorSearchCtrl.setValue("");
+            this.selectedCastsList = [];
+            this.alertService.show("Error", 'The content is already added.', "error");
+          }
+
         }
       });
     } else {
@@ -283,10 +291,10 @@ export class AddContentComponent implements OnInit {
               }
             });
             if (!isFound) {
-              let cast: DtoMovieCast = new DtoMovieCast(nameElement, [], 0, "",[]);
+              let cast: DtoMovieCast = new DtoMovieCast(nameElement, [], 0, "", []);
               this.movieCastService.addCast(cast).subscribe({
                 next: (data) => {
-                  let movieCast = { id: data.id, name: nameElement, poster: "", contentIdList: [], castType: 0,directedContentIdList:[]};
+                  let movieCast = { id: data.id, name: nameElement, poster: "", contentIdList: [], castType: 0, directedContentIdList: [] };
                   this.castList.push(movieCast);
                   this.selectedCastsList.push(movieCast);
                 }
@@ -298,9 +306,9 @@ export class AddContentComponent implements OnInit {
             this.selectedCastsList = [...data.casts];
           }
 
-          this.alertService.show("Success",'Content information was successfully retrieved and the form was filled out!',"success");
+          this.alertService.show("Success", 'Content information was successfully retrieved and the form was filled out!', "success");
         } else {
-          this.alertService.show("Error",'No content matching this ID was found.',"error");
+          this.alertService.show("Error", 'No content matching this ID was found.', "error");
         }
       },
       error: (err) => {

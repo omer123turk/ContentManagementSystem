@@ -125,7 +125,6 @@ export class ShowEpisodesComponents implements OnInit,OnDestroy {
     }
   }
 
-
   public getAllMetadatas(): void {
     this.metadataService.getAllMetadatas().subscribe(
       (response: Metadata[]) => {
@@ -150,7 +149,6 @@ export class ShowEpisodesComponents implements OnInit,OnDestroy {
       }
     )
   }
-
 
   ngOnInit(): void {
     this.initForm();
@@ -178,7 +176,6 @@ export class ShowEpisodesComponents implements OnInit,OnDestroy {
       director: ['']
     });
   }
-
 
   loadEpisodes(): void {
     this.isLoading = true;
@@ -228,7 +225,6 @@ export class ShowEpisodesComponents implements OnInit,OnDestroy {
     }
   }
 
-
   loadEpisodesInformations() {
     this.episodes = [];
     this.episodeContents.forEach(contentElement => {
@@ -268,8 +264,6 @@ export class ShowEpisodesComponents implements OnInit,OnDestroy {
 
     return casts;
   }
-
-
 
   loadDirector(directorId: number): String {
     let director: String = "";
@@ -399,7 +393,6 @@ export class ShowEpisodesComponents implements OnInit,OnDestroy {
     this.availableCasts = this.movieCasts;
   }
 
-
   addCastToForm() {
     const writtenName = this.castSearchCtrl.value?.trim();
     if (!writtenName) return;
@@ -428,7 +421,6 @@ export class ShowEpisodesComponents implements OnInit,OnDestroy {
     this.filteredCasts = [];
     this.showCastDropdown = false;
   }
-
 
   removeCastFromForm(index: number) {
     this.castsFormArray.removeAt(index);
@@ -508,7 +500,6 @@ export class ShowEpisodesComponents implements OnInit,OnDestroy {
     this.episodeForm.get('director')?.setValue(cast.name);
     this.showDirectorDropdown = false;
   }
-
 
   setupCastSearch() {
     this.castSearchCtrl.valueChanges.pipe(

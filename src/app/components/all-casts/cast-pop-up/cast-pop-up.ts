@@ -89,7 +89,6 @@ export class CastPopUp {
 
   }
 
-
   getAllMetadatas() {
     this.metadataService.getAllMetadatas().subscribe({
       next: (data) => {
@@ -103,8 +102,6 @@ export class CastPopUp {
       }
     });
   }
-
-
 
   ngOnInit(): void {
     let castType: string;
@@ -160,46 +157,31 @@ export class CastPopUp {
     this.selectedContentToAdd = event.option.viewValue;
   }
 
-  // Seçilen içeriği "Assigned" listesine ekler
   addContent(): void {
     const writtenName = this.unassignedSearchControl.value?.trim();
     
-    // Eğer listeden seçilen bir şey varsa onu ekle, yoksa elle yazılanı ekle
     const contentToAdd = this.selectedContentToAdd || writtenName;
 
     if (contentToAdd) {
-      // Çift eklemeyi önlemek için kontrol et
       if (!this.assignedContents.includes(contentToAdd)) {
         this.assignedContents.push(contentToAdd);
-        
-        // "Unassigned" ana listesinden de çıkarıyoruz
         this.unassignedContents = this.unassignedContents.filter(c => c !== contentToAdd);
       }
-
-      // Input ve seçim durumlarını sıfırla
       this.resetSearchInput();
     }
   }
 
-  // Çarpı butonuna basıldığında içeriği kaldırır
+
   removeContent(contentToRemove: string): void {
-    // "Assigned" listesinden kaldır
     this.assignedContents = this.assignedContents.filter(c => c !== contentToRemove);
-    
-    // "Unassigned" listesine geri ekle
     this.unassignedContents.push(contentToRemove);
-    
-    // Filtrelenmiş listeyi otomatik tetiklemek için input değerini yenile
     this.unassignedSearchControl.setValue(this.unassignedSearchControl.value);
   }
 
-  // Input ve autocomplete durumunu temizleme
   resetSearchInput(): void {
     this.unassignedSearchControl.setValue('', { emitEvent: true });
     this.selectedContentToAdd = null;
   }
-
-
 
   onSubmit(): void {
 
