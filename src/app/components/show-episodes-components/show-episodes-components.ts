@@ -15,6 +15,7 @@ import { DtoAllEpisode } from '../../Models/DtoAllEpisode';
 import { DtoAddContent } from '../../Models/DtoAddContent';
 import { DtoEpisodeWithActors } from '../../Models/DtoEpisodeWithActors';
 import { AlertService } from '../../Services/alert';
+import { RouterLink } from '@angular/router';
 
 interface Episode {
   id: string;
@@ -30,7 +31,7 @@ interface Episode {
 
 @Component({
   selector: 'app-show-episodes-components',
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule,RouterLink],
   templateUrl: './show-episodes-components.html',
   styleUrl: './show-episodes-components.css',
   changeDetection: ChangeDetectionStrategy.Eager

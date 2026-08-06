@@ -67,6 +67,9 @@
                             <button class="btn btn-edit" (click)="openEditModal(episode)">
                                 Edit
                             </button>
+                            <button class="btn btn-edit" [routerLink]="['/media', episode.id]">
+                                Media
+                            </button>
                             <button class="btn btn-delete" (click)="deleteEpisode(episode.id)">
                                 Delete
                             </button>
