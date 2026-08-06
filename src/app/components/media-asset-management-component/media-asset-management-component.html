@@ -1,0 +1,139 @@
+<div class="asset-container my-4 px-3">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="h4 mb-1 text-slate-900 fw-bold">Media and Subtitle Management</h2>
+      <p class="text-muted small mb-0">Content ID: <span class="badge bg-secondary">#{{ contentId }}</span></p>
+    </div>
+    <button class="btn btn-primary d-flex align-items-center gap-2" (click)="openModal()">
+      <i class="bi bi-plus-circle-fill"></i> Add New Media/Subtitle
+    </button>
+  </div>
+
+  <div class="asset-card">
+    <div class="table-responsive">
+      <table class="asset-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Title</th>
+            <th>Type</th>
+            <th>Quality</th>
+            <th>Language</th>
+            <th>URL</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let asset of mediaAssets">
+            <td>#{{ asset.id }}</td>
+            <td><strong>{{ asset.title }}</strong></td>
+            <td>
+              <span class="badge bg-info text-dark">{{ asset.assetType }}</span>
+            </td>
+            <td>{{ asset.quality || '-' }}</td>
+            <td>
+              <span class="badge bg-secondary">{{ asset.languageCode | uppercase }}</span>
+            </td>
+            <td>
+              <a [href]="asset.url" target="_blank" class="url-link" [title]="asset.url">
+                {{ asset.url }}
+              </a>
+            </td>
+            <td class="text-end">
+              <button class="btn btn-sm btn-outline-primary me-1" (click)="openEditModal(asset)">
+                <i class="bi bi-pencil"></i> Edit
+              </button>
+              <button class="btn btn-sm btn-outline-danger" (click)="deleteAsset(asset.id)">
+                <i class="bi bi-trash"></i> Delete
+              </button>
+            </td>
+          </tr>
+
+          <tr *ngIf="mediaAssets.length === 0 && !loading">
+            <td colspan="7" class="text-center py-5 text-muted">
+              <i class="bi bi-folder-x fs-2 d-block mb-2"></i>
+              No media or subtitle assets found for this content yet.
+            </td>
+          </tr>
+
+          <tr *ngIf="loading">
+            <td colspan="7" class="text-center py-4">
+              <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+              <span class="ms-2">Loading media assets...</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="custom-modal-backdrop" *ngIf="showModal">
+  <div class="custom-modal-dialog">
+    <div class="custom-modal-content">
+      
+      <div class="custom-modal-header">
+        <h5 class="custom-modal-title">
+          {{ isEditMode ? 'Edit Media Asset' : 'Add New Media Asset' }}
+        </h5>
+        <button type="button" class="btn-close" (click)="closeModal()">✕</button>
+      </div>
+
+      <form [formGroup]="assetForm" (ngSubmit)="onSubmit()">
+        <div class="custom-modal-body">
+          <div class="row g-3">
+            
+            <div class="col-md-6">
+              <label class="form-label">Title *</label>
+              <input type="text" class="form-control" formControlName="title" placeholder="e.g. English Audio 1080p">
+              <div class="text-danger small mt-1" *ngIf="assetForm.get('title')?.touched && assetForm.get('title')?.invalid">
+                Title field is required.
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Media Type *</label>
+              <select class="form-select" formControlName="assetType">
+                <option *ngFor="let type of assetTypes" [value]="type">{{ type }}</option>
+              </select>
+            </div>
+
+            <div class="col-md-12">
+              <label class="form-label">Media URL *</label>
+              <input type="url" class="form-control" formControlName="url" placeholder="https://cdn.saattek.com/videos/video-1080p.mp4">
+              <div class="text-danger small mt-1" *ngIf="assetForm.get('url')?.touched && assetForm.get('url')?.invalid">
+                Please enter a valid URL (must start with http:// or https://).
+              </div>
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label">Resolution Quality</label>
+              <select class="form-select" formControlName="quality">
+                <option *ngFor="let q of videoQualities" [value]="q">{{ q }}</option>
+              </select>
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label">Language Code (ISO)</label>
+              <input type="text" class="form-control" formControlName="languageCode" placeholder="en, es, tr etc.">
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label">Duration (Seconds)</label>
+              <input type="number" class="form-control" formControlName="durationSeconds" placeholder="3600">
+            </div>
+
+          </div>
+        </div>
+
+        <div class="custom-modal-footer">
+          <button type="button" class="btn btn-outline-secondary" (click)="closeModal()">Cancel</button>
+          <button type="submit" class="btn btn-success" [disabled]="assetForm.invalid">
+            <i class="bi bi-check-lg"></i> {{ isEditMode ? 'Update' : 'Save' }}
+          </button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+</div>

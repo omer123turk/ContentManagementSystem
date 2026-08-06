@@ -5,6 +5,7 @@ import { AllCasts } from './components/all-casts/all-casts';
 import { ShowSeasonsComponent } from './components/show-seasons-component/show-seasons-component';
 import { ShowEpisodesComponents } from './components/show-episodes-components/show-episodes-components';
 import { AddContentComponent } from './components/add-content-component/add-content-component';
+import { MediaAssetManagementComponent } from './components/media-asset-management-component/media-asset-management-component';
 
 
 export const routes: Routes = [
@@ -22,5 +23,7 @@ export const routes: Routes = [
     { path: 'go-episodes/:id', component: ShowEpisodesComponents },
 
     { path: 'all-casts', component: AllCasts },
+
+    { path: 'media/:contentId', component: MediaAssetManagementComponent },
 
 ];
